@@ -20,6 +20,9 @@ Or install it yourself as:
 
 ## Usage
 
+First: 
+`require 'cartodb-common'`
+
 ### Encryption
 
 Encrypt with Argon2:
