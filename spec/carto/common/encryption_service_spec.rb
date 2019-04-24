@@ -3,7 +3,7 @@ require 'spec_helper'
 RSpec.describe Carto::Common::EncryptionService do
 
   before(:all) do
-    @service = Carto::Common::EncryptionService.new
+    @service = Carto::Common::EncryptionService
     @password = "location"
     @salt = "98dffcb748fc487987af5774ec3aab2d106e8578"
     # "location" encrypted with different methods
