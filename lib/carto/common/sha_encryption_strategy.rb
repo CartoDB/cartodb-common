@@ -25,10 +25,24 @@ module Carto
       end
 
       def self.verify(password:, secure_password:, salt: nil, **_)
+        sha_class = sha_class(secure_password)
+        return false unless sha_class
+
+        if secure_password =~ /^\$sha/
+          digest_from_encryption = secure_password.split('$')[-1]
+          salt_from_encryption = secure_password.split('$')[-2]
+          digest_from_encryption == encrypt(password: password, salt: salt_from_encryption, sha_class: sha_class)
+        else
+          secure_password == encrypt(password: password, salt: salt, sha_class: sha_class)
+        end
+      end
+
+      def self.sha_class(secure_password)
         case secure_password
-        when /^\h{40}$/ then secure_password == encrypt(password: password, salt: salt, sha_class: Digest::SHA1)
-        when /^\h{64}$/ then secure_password == encrypt(password: password, salt: salt, sha_class: Digest::SHA256)
-        else false
+        when /^\$sha\$v=1/ then Digest::SHA1
+        when /^\h{40}$/ then Digest::SHA1
+        when /^\$sha\$v=256/ then Digest::SHA256
+        when /^\h{64}$/ then Digest::SHA256
         end
       end
 

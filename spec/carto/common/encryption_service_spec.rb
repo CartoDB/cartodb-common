@@ -77,41 +77,59 @@ RSpec.describe Carto::Common::EncryptionService do
       end
     end
 
-    context "with SHA1" do
+    shared_examples "SHA password" do
       it "returns true if the encryption matches" do
-        result = @service.verify(password: @password, secure_password: @sha1, salt: @salt)
+        result = @service.verify(password: @password, secure_password: @sha_password, salt: @salt)
         expect(result).to be true
       end
 
       it "returns false if the encryption does not match" do
-        result = @service.verify(password: "other", secure_password: @sha1, salt: @salt)
+        result = @service.verify(password: "other", secure_password: @sha_password, salt: @salt)
         expect(result).to be false
       end
 
       it "verifies passwords encrypted by the service" do
-        encrypted = @service.encrypt(password: "wadus", sha_class: Digest::SHA1, salt: "himalayan")
+        encrypted = @service.encrypt(password: "wadus", sha_class: @sha_class, salt: "himalayan")
         result = @service.verify(password: "wadus", secure_password: encrypted, salt: "himalayan")
         expect(result).to be true
       end
+    end
+
+    context "with SHA1" do
+      before(:all) do
+        @sha_password = @sha1
+        @sha_class = Digest::SHA1
+      end
+
+      it_behaves_like "SHA password"
+    end
+
+    context "with SHA1 in new format" do
+      before(:all) do
+        @sha_password = "$sha$v=1$$#{@salt}$#{@sha1}"
+        @sha_class = Digest::SHA1
+      end
+
+      it_behaves_like "SHA password"
     end
 
     context "with SHA256" do
-      it "returns true if the encryption matches" do
-        result = @service.verify(password: @password, secure_password: @sha256, salt: @salt)
-        expect(result).to be true
+      before(:all) do
+        @sha_password = @sha256
+        @sha_class = Digest::SHA256
       end
 
-      it "returns false if the encryption does not match" do
-        result = @service.verify(password: "other", secure_password: @sha256, salt: @salt)
-        expect(result).to be false
-      end
-
-      it "verifies passwords encrypted by the service" do
-        encrypted = @service.encrypt(password: "wadus", sha_class: Digest::SHA1, salt: "himalayan")
-        result = @service.verify(password: "wadus", secure_password: encrypted, salt: "himalayan")
-        expect(result).to be true
-      end
+      it_behaves_like "SHA password"
     end
+
+    context "with SHA256 in new format" do
+      before(:all) do
+        @sha_password = "$sha$v=256$$#{@salt}$#{@sha256}"
+        @sha_class = Digest::SHA256
+      end
+
+      it_behaves_like "SHA password"
+    end    
   end
 
   describe "#make_token" do
