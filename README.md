@@ -1,6 +1,6 @@
 # cartodb-common
 
-Ruby gem with common tools for (CartoDB)[https://github.com/CartoDB/cartodb]
+Ruby gem with common tools for [CartoDB](https://github.com/CartoDB/cartodb)
 
 ## Installation
 
