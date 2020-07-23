@@ -21,6 +21,7 @@ Gem::Specification.new do |spec|
   end
 
   spec.add_dependency 'argon2', '~> 2.0'
+  spec.add_dependency 'activesupport', '~> 4.2.11.3'
 
   spec.add_development_dependency "bundler", "~> 2.0"
   spec.add_development_dependency "rake", "~> 13.0"

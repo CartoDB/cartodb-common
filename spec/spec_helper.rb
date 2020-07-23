@@ -1,5 +1,6 @@
 require "bundler/setup"
 require "carto/common/encryption_service"
+require "carto/common/logger_formatter"
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
