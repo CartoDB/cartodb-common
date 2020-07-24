@@ -1,5 +1,9 @@
 require "action_controller/log_subscriber"
 
+##
+# Extends ActionController::LogSubscriber to improve JSON logging capabilities
+# Original source: https://github.com/rails/rails/blob/4-2-stable/actionpack/lib/action_controller/log_subscriber.rb
+#
 module Carto
   module Common
     class ActionControllerLogSubscriber < ActionController::LogSubscriber
@@ -36,7 +40,7 @@ module Carto
           status ||= ActionDispatch::ExceptionWrapper.status_code_for_exception(exception.first)
           log_entry[:exception] = { message: exception.join(': ') }
         end
-        log_entry.merge(status: status, status_text: Rack::Utils::HTTP_STATUS_CODES[status])
+        log_entry.merge!(status: status, status_text: Rack::Utils::HTTP_STATUS_CODES[status])
 
         exception.present? ? error(log_entry) : info(log_entry)
       end
