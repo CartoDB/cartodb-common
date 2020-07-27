@@ -28,6 +28,8 @@ module Carto
             deep_obfuscate_values(value)
           elsif key.match?(/password|auth|token|crypt|secret/i)
             hash[key] = '[FILTERED]'
+          else # ex. ActionDispatch::Http::UploadedFile
+            hash[key] = "[Instance of #{value.class}]"
           end
         end
       end
