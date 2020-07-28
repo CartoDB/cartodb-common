@@ -57,8 +57,14 @@ ActionController::Instrumentation.module_eval do
   end
 
   def extra_log_context
-    username = try(:current_user) ? current_user&.username : nil
     context = { request_id: request.uuid }
+
+    begin
+      username = current_user.username
+    rescue StandardError
+      # try(:current_user) and respond_to?(:current_user) don't work
+      # because how warden defines this method
+    end
 
     username ? context.merge(current_user: username) : context
   end
