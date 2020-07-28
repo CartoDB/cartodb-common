@@ -57,15 +57,10 @@ ActionController::Instrumentation.module_eval do
   end
 
   def extra_log_context
-    username = nil
-    begin
-      username = current_user.username
-    rescue StandardError
-    end
-
+    username = self.respond_to?(:current_user) ? current_user&.username : nil
     context = { request_id: request.uuid }
-    context[:current_user] = username if username
-    context
+
+    username ? context.merge(current_user: username) context
   end
 
 end
