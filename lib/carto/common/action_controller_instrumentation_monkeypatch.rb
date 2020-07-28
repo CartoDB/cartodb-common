@@ -57,7 +57,7 @@ ActionController::Instrumentation.module_eval do
   end
 
   def extra_log_context
-    username = self.respond_to?(:current_user) ? current_user&.username : nil
+    username = try(:current_user) ? current_user&.username : nil
     context = { request_id: request.uuid }
 
     username ? context.merge(current_user: username) : context
