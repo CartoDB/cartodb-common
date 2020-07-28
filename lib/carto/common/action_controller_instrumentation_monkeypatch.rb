@@ -60,7 +60,7 @@ ActionController::Instrumentation.module_eval do
     username = self.respond_to?(:current_user) ? current_user&.username : nil
     context = { request_id: request.uuid }
 
-    username ? context.merge(current_user: username) context
+    username ? context.merge(current_user: username) : context
   end
 
 end
