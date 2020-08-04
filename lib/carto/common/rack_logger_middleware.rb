@@ -8,12 +8,12 @@ module Carto
 
       # Complete with parameters that can be safely logged, as it is
       # safer to don't log anything by default.
-      LOGGABLE_PARAMS = %w[
+      LOGGABLE_PARAMS = %w(
         id
         username
         created_at
         updated_at
-      ].freeze
+      )
 
       private
 
