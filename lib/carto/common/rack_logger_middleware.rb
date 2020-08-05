@@ -6,6 +6,15 @@ module Carto
   module Common
     class RackLoggerMiddleware < ::Rails::Rack::Logger
 
+      # Complete with parameters that can be safely logged, as it is
+      # safer to don't log anything by default.
+      LOGGABLE_PARAMS = %w[
+        id
+        username
+        created_at
+        updated_at
+      ].freeze
+
       private
 
       def started_request_message(request)
@@ -26,8 +35,8 @@ module Carto
         hash.each do |key, value|
           if value.is_a?(Hash)
             deep_obfuscate_values(value)
-          elsif key.match?(/password|auth|token|crypt|secret/i)
-            hash[key] = '[FILTERED]'
+          elsif value.is_a?(String)
+            hash[key] = LOGGABLE_PARAMS.include?(key.to_s) ? value : ('*' * value.length)
           else # ex. ActionDispatch::Http::UploadedFile
             hash[key] = "[Instance of #{value.class}]"
           end
