@@ -27,7 +27,7 @@ module Carto
           request_path: request.path,
           remote_ip: request.remote_ip,
           timestamp: Time.now.to_default_s,
-          params: deep_obfuscate_values(request.params.to_h.deep_symbolize_keys),
+          query_string: Rack::Utils.build_nested_query(deep_obfuscate_values(request.params.to_h.deep_symbolize_keys))
         }
       end
 
@@ -37,6 +37,8 @@ module Carto
             deep_obfuscate_values(value)
           elsif value.is_a?(String)
             hash[key] = LOGGABLE_PARAMS.include?(key.to_s) ? value : ('*' * value.length)
+          elsif value.is_a?(Array)
+            hash[key] = value.join(',')
           else # ex. ActionDispatch::Http::UploadedFile
             hash[key] = "[Instance of #{value.class}]"
           end
