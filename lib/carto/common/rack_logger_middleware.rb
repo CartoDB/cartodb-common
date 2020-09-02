@@ -18,6 +18,7 @@ module Carto
       private
 
       def started_request_message(request)
+        obfuscated_query = deep_obfuscate_values(request.params.to_h.deep_symbolize_keys)
         {
           message: 'Received request',
           request_id: request.uuid,
@@ -27,7 +28,7 @@ module Carto
           request_path: request.path,
           remote_ip: request.remote_ip,
           timestamp: Time.now.to_default_s,
-          query_string: Rack::Utils.build_nested_query(deep_obfuscate_values(request.params.to_h.deep_symbolize_keys))
+          query_string: Rack::Utils.build_nested_query(obfuscated_query)
         }
       end
 
