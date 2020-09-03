@@ -1,3 +1,4 @@
 /.bundle/
 .rspec_status
-.rubocop-https---raw-githubusercontent-com-cartodb-cartodb-master--rubocop-yml
+.rubocop-*rubocop-yml
+.idea

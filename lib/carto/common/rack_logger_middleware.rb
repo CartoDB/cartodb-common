@@ -18,6 +18,7 @@ module Carto
       private
 
       def started_request_message(request)
+        obfuscated_query = deep_obfuscate_values(request.params.to_h.deep_symbolize_keys)
         {
           message: 'Received request',
           request_id: request.uuid,
@@ -27,7 +28,7 @@ module Carto
           request_path: request.path,
           remote_ip: request.remote_ip,
           timestamp: Time.now.to_default_s,
-          params: deep_obfuscate_values(request.params.to_h.deep_symbolize_keys),
+          query_string: Rack::Utils.build_nested_query(obfuscated_query)
         }
       end
 
@@ -36,13 +37,18 @@ module Carto
           if value.is_a?(Hash)
             deep_obfuscate_values(value)
           elsif value.is_a?(String)
-            hash[key] = LOGGABLE_PARAMS.include?(key.to_s) ? value : ('*' * value.length)
+            hash[key] = LOGGABLE_PARAMS.include?(key.to_s) ? value : obfuscate_string(value)
+          elsif value.is_a?(Array)
+            hash[key] = value.map { |entry| obfuscate_string(entry) }.join(',')
           else # ex. ActionDispatch::Http::UploadedFile
             hash[key] = "[Instance of #{value.class}]"
           end
         end
       end
 
+      def obfuscate_string(value)
+        ('*' * value.length)
+      end
     end
   end
 end
