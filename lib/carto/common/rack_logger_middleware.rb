@@ -39,7 +39,7 @@ module Carto
           elsif value.is_a?(String)
             hash[key] = LOGGABLE_PARAMS.include?(key.to_s) ? value : obfuscate_string(value)
           elsif value.is_a?(Array)
-            hash[key] = value.map { |entry| obfuscate_string(entry) }.join(",")
+            hash[key] = value.map { |entry| obfuscate_string(entry) }.join(',')
           else # ex. ActionDispatch::Http::UploadedFile
             hash[key] = "[Instance of #{value.class}]"
           end
