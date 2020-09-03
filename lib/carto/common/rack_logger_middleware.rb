@@ -37,15 +37,18 @@ module Carto
           if value.is_a?(Hash)
             deep_obfuscate_values(value)
           elsif value.is_a?(String)
-            hash[key] = LOGGABLE_PARAMS.include?(key.to_s) ? value : ('*' * value.length)
+            hash[key] = LOGGABLE_PARAMS.include?(key.to_s) ? value : obfuscate_string(value)
           elsif value.is_a?(Array)
-            hash[key] = value.join(',')
+            hash[key] = value.map { |entry| obfuscate_string(entry) }.join(",")
           else # ex. ActionDispatch::Http::UploadedFile
             hash[key] = "[Instance of #{value.class}]"
           end
         end
       end
 
+      def obfuscate_string(value)
+        ('*' * value.length)
+      end
     end
   end
 end
