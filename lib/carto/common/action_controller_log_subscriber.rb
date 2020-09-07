@@ -14,7 +14,6 @@ module Carto
         info(
           message: "Processing request",
           request_id: payload[:request_id],
-          component: 'central.rails_server',
           current_user: payload[:current_user],
           controller: "#{payload[:controller]}##{payload[:action]}",
           controller_format: payload[:format].to_s.upcase,
@@ -29,7 +28,6 @@ module Carto
         log_entry = {
           message: 'Request completed',
           request_id: payload[:request_id],
-          component: 'central.rails_server',
           current_user: payload[:current_user],
           duration_ms: event.duration.round,
           view_duration_ms: payload[:view_runtime],
@@ -49,7 +47,6 @@ module Carto
         info(
           message: 'Filter chain halted (rendered or redirected)',
           request_id: event.payload[:request_id],
-          component: 'central.rails_server',
           current_user: event.payload[:current_user],
           filter: event.payload[:filter].inspect
         )
@@ -59,7 +56,6 @@ module Carto
         info(
           message: 'Sent file',
           request_id: event.payload[:request_id],
-          component: 'central.rails_server',
           current_user: event.payload[:current_user],
           file: event.payload[:path],
           duration_ms: event.duration.round(1)
@@ -70,7 +66,6 @@ module Carto
         info(
           message: "Redirected",
           request_id: event.payload[:request_id],
-          component: 'central.rails_server',
           current_user: event.payload[:current_user],
           location: event.payload[:location]
         )
@@ -80,7 +75,6 @@ module Carto
         info(
           message: "Sent data",
           request_id: event.payload[:request_id],
-          component: 'central.rails_server',
           current_user: event.payload[:current_user],
           file: event.payload[:filename],
           duration_ms: event.duration.round(1)
@@ -91,7 +85,6 @@ module Carto
         debug(
           message: "Unpermitted parameter",
           request_id: event.payload[:request_id],
-          component: 'central.rails_server',
           current_user: event.payload[:current_user],
           unpermitted_params: event.payload[:keys]
         )

@@ -19,7 +19,6 @@ module Carto
 
         def log(params)
           Rails.logger.info(
-            component: 'central.resque',
             job_class: name,
             args: log_args(params[:args]),
             message: params[:message]
