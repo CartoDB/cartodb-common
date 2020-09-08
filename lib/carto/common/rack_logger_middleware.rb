@@ -22,7 +22,6 @@ module Carto
         {
           message: 'Received request',
           request_id: request.uuid,
-          component: 'central.rails_server',
           request_method: request.request_method,
           request_url: request.url,
           request_path: request.path,
