@@ -37,6 +37,20 @@ RSpec.describe Carto::Common::LoggerFormatter do
       expect(parsed_output['message']).to be_nil
       expect(parsed_output['event_message']).to eq('Something!')
     end
+
+    it 'can deal with non-utf8 strings' do
+      payload = {
+        message: 'Something',
+        body: "some non-utf8 \xe2 char",
+        some_other_value: 42
+      }
+      output = subject.call(severity, time, progname, payload)
+      parsed_output = JSON.parse(output)
+
+      expect(parsed_output['event_message']).to eq('Something')
+      expect(parsed_output['body']).to eq('some non-utf8 � char')
+      expect(parsed_output['some_other_value']).to eq(42)
+    end
   end
 
   context 'severity format' do
