@@ -52,7 +52,8 @@ RSpec.describe Carto::Common::LoggerFormatter do
 
       expect(parsed_output['event_message']).to eq('Something')
       expect(parsed_output['body']).to eq('some non-utf8 � char')
-      expect(parsed_output['some_nested_field']['another_non_utf8']).to eq('another non-utf8 � char')
+      expect(parsed_output['some_nested_field']['another_non_utf8'])
+        .to eq('another non-utf8 � char')
       expect(parsed_output['some_other_value']).to eq(42)
     end
   end
