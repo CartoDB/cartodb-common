@@ -2,3 +2,4 @@
 .rspec_status
 .rubocop-*rubocop-yml
 .idea
+pkg/
