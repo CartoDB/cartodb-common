@@ -15,6 +15,13 @@ module Carto
         replace_key(message_hash, :current_user, :'cdb-user')
         replace_key(message_hash, :message, :event_message)
 
+        message_hash.transform_values! do |value|
+          if value.is_a?(String)
+            value.encode('UTF-8', 'UTF-8', :invalid => :replace)
+          else
+            value
+          end
+        end
         development_environment? ? "#{JSON.pretty_generate(message_hash)}\n" : "#{message_hash.to_json}\n"
       end
 
