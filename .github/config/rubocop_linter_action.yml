@@ -1,0 +1,2 @@
+rubocop_fail_level: convention
+level: error
