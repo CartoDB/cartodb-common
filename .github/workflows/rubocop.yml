@@ -2,7 +2,7 @@
 name: Rubocop
 on: [pull_request]
 jobs:
-  rubocop:
+  rubocop_reviewdog:
     name: check
     runs-on: ubuntu-latest
     steps:
@@ -14,3 +14,16 @@ jobs:
           github_token: ${{ secrets.github_token }}
           reporter: github-pr-review # Optional. Default: github-pr-check
           level: error # Optional. Default: error
+
+  rubocop_somebody:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v1
+
+      - name: RuboCop Linter
+        uses: andrewmcodes/rubocop-linter-action@v3.3.0
+        with:
+          action_config_path: .rubocop.yml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
