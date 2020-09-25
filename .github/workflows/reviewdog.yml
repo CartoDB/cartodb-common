@@ -1,16 +1,13 @@
 name: reviewdog
 on: [push]
 jobs:
-  rubocop:
-    name: runner / rubocop
+  ruby_linter:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - name: rubocop
+      - name: Run Ruby linter
         uses: reviewdog/action-rubocop@v1
         with:
-          #rubocop_version: 0.80.1
-          #rubocop_extensions: rubocop-performance:1.5.1 rubocop-minitest
           github_token: ${{ secrets.github_token }}
           fail_on_error: true
-          #reporter: github-pr-review # Default is github-pr-check
+          #reporter: github-pr-review
