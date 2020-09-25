@@ -1,12 +1,12 @@
 # https://github.com/reviewdog/action-rubocop
-name: Rubocop
-on: [push]
-jobs:
-  ruby_linter:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - name: Run Ruby linter
-        uses: andrewmcodes/rubocop-linter-action@v3.3.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+# name: Rubocop (other person)
+# on: [push, pull_request]
+# jobs:
+#   ruby_linter:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v1
+#       - name: Run Ruby linter
+#         uses: andrewmcodes/rubocop-linter-action@v3.3.0
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

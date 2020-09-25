@@ -1,5 +1,5 @@
-name: reviewdog
-on: [push]
+name: Rubocop (reviewdog)
+on: [push, pull_request]
 jobs:
   ruby_linter:
     runs-on: ubuntu-latest
