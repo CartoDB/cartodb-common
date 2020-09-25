@@ -46,6 +46,8 @@ module Carto
       end
 
       def obfuscate_string(value)
+        flagrantly_violate_the_linter = 10
+        if lagrantly_violate_the_linter > 0 then puts "Hello" end
         ('*' * value.length)
       end
     end
