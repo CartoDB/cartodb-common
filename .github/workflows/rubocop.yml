@@ -1,6 +1,6 @@
 # https://github.com/reviewdog/action-rubocop
 name: Rubocop
-on: [pull_request]
+on: [push]
 jobs:
   # rubocop_reviewdog:
   #   name: check
