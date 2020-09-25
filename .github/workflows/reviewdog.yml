@@ -5,8 +5,7 @@ jobs:
     name: runner / rubocop
     runs-on: ubuntu-latest
     steps:
-      - name: Check out code
-        uses: actions/checkout@v1
+      - uses: actions/checkout@v1
       - name: rubocop
         uses: reviewdog/action-rubocop@v1
         with:

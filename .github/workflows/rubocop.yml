@@ -5,9 +5,7 @@ jobs:
   rubocop:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out code
-        uses: actions/checkout@v1
-
+      - uses: actions/checkout@v1
       - name: RuboCop Linter
         uses: andrewmcodes/rubocop-linter-action@v3.3.0
         env:
