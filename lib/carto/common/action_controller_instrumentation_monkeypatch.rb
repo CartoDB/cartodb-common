@@ -3,32 +3,33 @@
 # CARTO custom log subscribers
 #
 ActionController::Instrumentation.module_eval do
-
   def process_action(*args)
     raw_payload = {
-      :controller => self.class.name,
-      :action     => self.action_name,
-      :params     => request.filtered_parameters,
-      :format     => request.format.try(:ref),
-      :method     => request.request_method,
-      :path       => (request.fullpath rescue "unknown")
+      controller: self.class.name,
+      action: action_name,
+      params: request.filtered_parameters,
+      format: request.format.try(:ref),
+      method: request.request_method,
+      path: begin
+                       request.fullpath
+            rescue StandardError
+              'unknown'
+                     end
     }.merge(extra_log_context)
 
-    ActiveSupport::Notifications.instrument("start_processing.action_controller", raw_payload.dup)
+    ActiveSupport::Notifications.instrument('start_processing.action_controller', raw_payload.dup)
 
-    ActiveSupport::Notifications.instrument("process_action.action_controller", raw_payload) do |payload|
-      begin
-        result = super
-        payload[:status] = response.status
-        result
-      ensure
-        append_info_to_payload(payload)
-      end
+    ActiveSupport::Notifications.instrument('process_action.action_controller', raw_payload) do |payload|
+      result = super
+      payload[:status] = response.status
+      result
+    ensure
+      append_info_to_payload(payload)
     end
   end
 
   def redirect_to(*args)
-    ActiveSupport::Notifications.instrument("redirect_to.action_controller") do |payload|
+    ActiveSupport::Notifications.instrument('redirect_to.action_controller') do |payload|
       result = super
       payload[:status]   = response.status
       payload[:location] = response.filtered_location
@@ -37,15 +38,15 @@ ActionController::Instrumentation.module_eval do
     end
   end
 
-  def send_file(path, options={})
-    ActiveSupport::Notifications.instrument("send_file.action_controller",
-      options.merge(path: path).merge(extra_log_context)) do
+  def send_file(path, options = {})
+    ActiveSupport::Notifications.instrument('send_file.action_controller',
+                                            options.merge(path: path).merge(extra_log_context)) do
       super
     end
   end
 
   def send_data(data, options = {})
-    ActiveSupport::Notifications.instrument("send_data.action_controller", options.merge(extra_log_context)) do
+    ActiveSupport::Notifications.instrument('send_data.action_controller', options.merge(extra_log_context)) do
       super
     end
   end
@@ -53,7 +54,7 @@ ActionController::Instrumentation.module_eval do
   private
 
   def halted_callback_hook(filter)
-    ActiveSupport::Notifications.instrument("halted_callback.action_controller", extra_log_context.merge(filter: filter))
+    ActiveSupport::Notifications.instrument('halted_callback.action_controller', extra_log_context.merge(filter: filter))
   end
 
   def extra_log_context
@@ -68,5 +69,4 @@ ActionController::Instrumentation.module_eval do
 
     username ? context.merge(current_user: username) : context
   end
-
 end

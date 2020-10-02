@@ -1,4 +1,4 @@
-require "action_controller/log_subscriber"
+require 'action_controller/log_subscriber'
 
 ##
 # Extends ActionController::LogSubscriber to improve JSON logging capabilities
@@ -12,11 +12,11 @@ module Carto
         payload = event.payload
 
         info(
-          message: "Processing request",
+          message: 'Processing request',
           request_id: payload[:request_id],
           current_user: payload[:current_user],
           controller: "#{payload[:controller]}##{payload[:action]}",
-          controller_format: payload[:format].to_s.upcase,
+          controller_format: payload[:format].to_s.upcase
         )
       end
 
@@ -64,7 +64,7 @@ module Carto
 
       def redirect_to(event)
         info(
-          message: "Redirected",
+          message: 'Redirected',
           request_id: event.payload[:request_id],
           current_user: event.payload[:current_user],
           location: event.payload[:location]
@@ -73,7 +73,7 @@ module Carto
 
       def send_data(event)
         info(
-          message: "Sent data",
+          message: 'Sent data',
           request_id: event.payload[:request_id],
           current_user: event.payload[:current_user],
           file: event.payload[:filename],
@@ -83,7 +83,7 @@ module Carto
 
       def unpermitted_parameters(event)
         debug(
-          message: "Unpermitted parameter",
+          message: 'Unpermitted parameter',
           request_id: event.payload[:request_id],
           current_user: event.payload[:current_user],
           unpermitted_params: event.payload[:keys]

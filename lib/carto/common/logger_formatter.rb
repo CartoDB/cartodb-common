@@ -5,6 +5,7 @@ require 'json'
 module Carto
   module Common
     class LoggerFormatter < ::ActiveSupport::Logger::Formatter
+
       def call(severity, time, _progname, message)
         original_message = message.is_a?(Hash) ? message : { event_message: message }
 
@@ -28,7 +29,7 @@ module Carto
         return 'info' if severity.blank?
 
         level = severity.to_s.downcase
-        level == "warn" ? "warning" : level
+        level == 'warn' ? 'warning' : level
       end
 
       def development_environment?
@@ -51,6 +52,7 @@ module Carto
           end
         end
       end
+
     end
   end
 end

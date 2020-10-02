@@ -28,6 +28,7 @@ module Carto
 
       def self.hex_digest(encryption)
         return ShaEncryptionStrategy.encrypt(password: encryption) if argon2?(encryption)
+
         encryption
       end
 

@@ -48,6 +48,7 @@ module Carto
       def obfuscate_string(value)
         ('*' * value.length)
       end
+
     end
   end
 end

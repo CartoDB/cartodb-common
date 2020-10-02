@@ -9,7 +9,7 @@ module Carto
         Digest::SHA256 => '1211b3e77138f6e1724721f1ab740c9c70e66ba6fec5e989bb6640c4541ed15d06dbd5fdcbd3052b'
       }.freeze
 
-      DEFAULT_SHA_CLASS = Digest::SHA1      
+      DEFAULT_SHA_CLASS = Digest::SHA1
 
       def self.encrypt(password:, salt: nil, sha_class: DEFAULT_SHA_CLASS, **_)
         args = [salt, password].compact
