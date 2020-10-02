@@ -15,6 +15,10 @@ module Carto
         updated_at
       ].freeze
 
+      def test_rubocop_check
+        return 1 > 0
+      end
+
       private
 
       def started_request_message(request)
