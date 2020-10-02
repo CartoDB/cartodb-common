@@ -54,7 +54,10 @@ ActionController::Instrumentation.module_eval do
   private
 
   def halted_callback_hook(filter)
-    ActiveSupport::Notifications.instrument('halted_callback.action_controller', extra_log_context.merge(filter: filter))
+    ActiveSupport::Notifications.instrument(
+      'halted_callback.action_controller',
+      extra_log_context.merge(filter: filter)
+    )
   end
 
   def extra_log_context

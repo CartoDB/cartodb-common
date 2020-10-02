@@ -1,2 +1,26 @@
 inherit_from:
   - https://raw.githubusercontent.com/CartoDB/cartodb/master/.rubocop.yml
+
+inherit_mode:
+  merge:
+    - Exclude
+
+####################
+#  Metrics
+####################
+
+Metrics/BlockLength:
+  Exclude:
+    - lib/carto/common/action_controller_instrumentation_monkeypatch.rb
+
+Metrics/ModuleLength:
+  Exclude:
+    - lib/carto/common/countries_helper.rb
+
+####################
+#  Naming
+####################
+
+Naming/FileName:
+  Exclude:
+    - lib/cartodb-common.rb

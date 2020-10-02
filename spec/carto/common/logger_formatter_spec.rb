@@ -94,6 +94,8 @@ RSpec.describe Carto::Common::LoggerFormatter do
     time = '2020-07-23T13:25:23.649+00:00'
     output = subject.call(severity, time, progname, 'Something!')
 
-    expect(output).to eq("{\"event_message\":\"Something!\",\"timestamp\":\"#{time}\",\"levelname\":\"info\",\"cdb-user\":null}\n")
+    expect(output).to eq(
+      "{\"event_message\":\"Something!\",\"timestamp\":\"#{time}\",\"levelname\":\"info\",\"cdb-user\":null}\n"
+    )
   end
 end
