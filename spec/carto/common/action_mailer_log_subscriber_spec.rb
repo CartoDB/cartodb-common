@@ -11,8 +11,10 @@ RSpec.describe 'Carto::Common::ActionMailerLogSubscriber' do
 
     @users = []
 
-    def self.users
-      @users
+    class << self
+
+      attr_reader :users
+
     end
 
     def self.find_by(params = {})
@@ -23,7 +25,6 @@ RSpec.describe 'Carto::Common::ActionMailerLogSubscriber' do
       self.email = params[:email]
       self.username = params[:username]
       User.users << self
-      self
     end
 
   end
