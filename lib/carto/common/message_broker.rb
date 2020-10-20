@@ -5,11 +5,11 @@ module Carto
   module Common
 
     class MessageBroker
-
       include Singleton
 
       def initialize()
-        @project_id = CartodbCentral.config[:message_broker]['project_id']
+        @config = Config.instance
+        @project_id = @config.project_id
         @pubsub = Google::Cloud::Pubsub.new(project: @project_id)
         @topics = {}
         @subscriptions = {}
@@ -28,6 +28,25 @@ module Carto
         @subscriptions[subscription_name] ||= Subscription.new(@pubsub,
                                                                project_id: @project_id,
                                                                subscription_name: subscription_name)
+      end
+
+      class Config
+        include Singleton
+
+        attr_reader :project_id
+
+        def initialize()
+          if self.class.const_defined?(:Cartodb)
+            config_module = Cartodb
+          elsif self.class.const_defined?(:CartodbCentral)
+            config_module = CartodbCentral
+          else
+            raise "Couldn't find a suitable config module"
+          end
+
+          config = config_module.config[:message_broker]
+          @project_id = config['project_id']
+        end
       end
 
       class Topic
