@@ -56,8 +56,8 @@ module Carto
           @topic = @pubsub.topic("projects/#{@project_id}/topics/#{topic.to_s}")
         end
 
-        def publish(event , attributes)
-          @topic.publish(event.to_s, attributes)
+        def publish(event, payload)
+          @topic.publish(payload.to_json, {event: event.to_s})
         end
 
         def create_subscription(subscription, options = {})
