@@ -1,4 +1,5 @@
 require_relative 'action_controller_log_subscriber'
+require_relative 'action_mailer_log_subscriber'
 require_relative 'logger_formatter'
 require_relative 'rack_logger_middleware'
 
@@ -29,6 +30,8 @@ module Carto
             unsubscribe(:action_view, subscriber)
           when ActionController::LogSubscriber
             unsubscribe(:action_controller, subscriber)
+          when ActionMailer::LogSubscriber
+            unsubscribe(:action_mailer, subscriber)
           end
         end
       end
@@ -36,6 +39,7 @@ module Carto
 
       def self.attach_custom_log_subscribers
         Carto::Common::ActionControllerLogSubscriber.attach_to(:action_controller)
+        Carto::Common::ActionMailerLogSubscriber.attach_to(:action_mailer)
       end
       private_class_method :attach_custom_log_subscribers
 

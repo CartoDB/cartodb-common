@@ -3,3 +3,4 @@
 .rubocop-*rubocop-yml
 .idea
 pkg/
+.byebug_history
