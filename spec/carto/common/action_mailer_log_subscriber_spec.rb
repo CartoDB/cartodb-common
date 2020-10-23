@@ -1,33 +1,33 @@
 require 'spec_helper'
 require './lib/carto/common/action_mailer_log_subscriber'
 
-RSpec.describe 'Carto::Common::ActionMailerLogSubscriber' do
-  subject { Carto::Common::ActionMailerLogSubscriber.new }
+# Mocks CartoDB & Central users as they don't exist in the context of this gem
+class User
 
-  # Mocks CartoDB & Central users as they don't exist in the context of this gem
-  class User
+  attr_accessor :email, :username
 
-    attr_accessor :email, :username
+  @users = []
 
-    @users = []
+  class << self
 
-    class << self
-
-      attr_reader :users
-
-    end
-
-    def self.find_by(params = {})
-      @users.select { |user| user.email == params[:email] }.first
-    end
-
-    def initialize(params = {})
-      self.email = params[:email]
-      self.username = params[:username]
-      User.users << self
-    end
+    attr_reader :users
 
   end
+
+  def self.find_by(params = {})
+    @users.select { |user| user.email == params[:email] }.first
+  end
+
+  def initialize(params = {})
+    self.email = params[:email]
+    self.username = params[:username]
+    User.users << self
+  end
+
+end
+
+RSpec.describe 'Carto::Common::ActionMailerLogSubscriber' do
+  subject { Carto::Common::ActionMailerLogSubscriber.new }
 
   let(:event_name) {}
   let(:event_payload) { {} }
