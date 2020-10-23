@@ -70,7 +70,7 @@ RSpec.describe 'Carto::Common::ActionMailerLogSubscriber' do
         message_id: 1,
         current_user: user.username,
         email_subject: 'Subject',
-        email_to_hint: ['s******y@e*********m'],
+        email_to_hint: ['s*****y@e*****m'],
         email_from: ['foo@bar.com'],
         email_date: nil
       )
@@ -82,7 +82,7 @@ RSpec.describe 'Carto::Common::ActionMailerLogSubscriber' do
       let(:receiver_addresses) { ['first@mail.com', 'second@mail.com'] }
 
       it 'logs all the addresses' do
-        expect(subject).to receive(:info).with(hash_including(email_to_hint: ['f***t@m******m', 's****d@m******m']))
+        expect(subject).to receive(:info).with(hash_including(email_to_hint: ['f*****t@m*****m', 's*****d@m*****m']))
         subject.deliver(event)
       end
     end

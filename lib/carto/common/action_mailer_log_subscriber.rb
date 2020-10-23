@@ -64,7 +64,7 @@ module Carto
         end
 
         address.split('@').map do |segment|
-          segment[0] + '*' * (segment.length - 2) + segment[-1]
+          segment[0] + '*****' + segment[-1]
         end.join('@')
       end
 
