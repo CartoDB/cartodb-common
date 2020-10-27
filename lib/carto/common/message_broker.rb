@@ -101,7 +101,7 @@ module Carto
         end
 
         def start(options = {})
-          @subscriber = @subscription.listen(options, &:main_callback)
+          @subscriber = @subscription.listen(options, &method(:main_callback))
           @subscriber.start
         end
 
