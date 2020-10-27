@@ -74,11 +74,39 @@ module Carto
           @project_id = project_id
           @subscription_name = subscription_name
           @subscription = @pubsub.get_subscription(subscription_name, project: project_id)
+          @callbacks = {}
+          @subscriber = nil
         end
 
-        def listen(options = {}, &block)
-          # NOTE this returns a plain Google::Cloud::PubSub::Subscriber
-          @subscription.listen(options, &block)
+        def register_callback(message_type, &block)
+          @callbacks[message_type.to_sym] = block
+        end
+
+        def main_callback(received_message)
+          message_type = received_message.attributes['event'].to_sym
+          message_callback = @callbacks[message_type]
+          if message_callback
+            begin
+              payload = JSON.parse(received_message.data).with_indifferent_access
+              message_callback.call(payload)
+              received_message.ack!
+            rescue StandardError => ex
+              puts ex
+              received_message.ack!
+            end
+          else
+            puts "No callback registered for message #{message_type}"
+            received_message.reject!
+          end
+        end
+
+        def start(options = {})
+          @subscriber = @subscription.listen(options, &:main_callback)
+          @subscriber.start
+        end
+
+        def stop!
+          @subscriber.stop!
         end
       end
 
