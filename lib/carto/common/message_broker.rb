@@ -7,6 +7,8 @@ module Carto
     class MessageBroker
       include Singleton
 
+      attr_reader :project_id
+
       def initialize()
         @config = Config.instance
         @project_id = @config.project_id
@@ -15,17 +17,20 @@ module Carto
         @subscriptions = {}
       end
 
-      def get_topic(topic_name)
+      def get_topic(topic)
+        topic_name = topic.to_s
         @topics[topic_name] ||= Topic.new(@pubsub, project_id: @project_id, topic: topic_name)
       end
 
-      def create_topic(topic_name)
-        @pubsub.create_topic(topic_name.to_s) rescue Google::Cloud::AlreadyExistsError
+      def create_topic(topic)
+        topic_name = topic.to_s
+        @pubsub.create_topic(topic_name) rescue Google::Cloud::AlreadyExistsError
         get_topic(topic_name)
       end
 
-      def get_subscription(subscription_name)
-        @subscriptions[subscription_name] ||= Subscription.new(@pubsub,
+      def get_subscription(subscription)
+        subscription_name = subscription.to_s
+        @subscriptions[subscription] ||= Subscription.new(@pubsub,
                                                                project_id: @project_id,
                                                                subscription_name: subscription_name)
       end
@@ -50,10 +55,13 @@ module Carto
       end
 
       class Topic
+        attr_reader :project_id, :topic_name
+
         def initialize(pubsub, project_id:, topic:)
           @pubsub = pubsub
           @project_id = project_id
-          @topic = @pubsub.topic("projects/#{@project_id}/topics/#{topic.to_s}")
+          @topic_name = topic.to_s
+          @topic = @pubsub.topic("projects/#{@project_id}/topics/#{@topic_name}")
         end
 
         def publish(event, payload)
