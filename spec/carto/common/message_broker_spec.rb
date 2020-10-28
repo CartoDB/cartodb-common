@@ -63,3 +63,32 @@ RSpec.describe Carto::Common::MessageBroker do
     end
   end
 end
+
+RSpec.describe Carto::Common::MessageBroker::Config do
+  before(:each) do
+    Carto::Common::MessageBroker::Config.instance_variable_set(:@singleton__instance__, nil)
+    Object.send(:remove_const, :Cartodb) if Object.constants.include?(:Cartodb)
+    Object.send(:remove_const, :CartodbCentral) if Object.constants.include?(:CartodbCentral)
+  end
+
+  it 'uses Cartodb config module if it exists' do
+    config_module = Object.const_set(:Cartodb, Module.new)
+    config_module.define_singleton_method(:config) do
+      { message_broker: { 'project_id' => 'test-project-id' } }
+    end
+    expect(Carto::Common::MessageBroker::Config.instance.project_id).to eql 'test-project-id'
+  end
+
+  it 'uses CartodbCentral config module if it exists' do
+    config_module = Object.const_set(:CartodbCentral, Module.new)
+    config_module.define_singleton_method(:config) do
+      { message_broker: { 'project_id' => 'test-project-id' } }
+    end
+    expect(Carto::Common::MessageBroker::Config.instance.project_id).to eql 'test-project-id'
+  end
+
+  it 'raises an error if neither is defined' do
+    expect { Carto::Common::MessageBroker::Config.instance}.to raise_error "Couldn't find a suitable config module"
+  end
+
+end
