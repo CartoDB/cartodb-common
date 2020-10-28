@@ -31,8 +31,8 @@ module Carto
       def get_subscription(subscription)
         subscription_name = subscription.to_s
         @subscriptions[subscription] ||= Subscription.new(@pubsub,
-                                                               project_id: @project_id,
-                                                               subscription_name: subscription_name)
+                                                          project_id: @project_id,
+                                                          subscription_name: subscription_name)
       end
 
       class Config
@@ -98,8 +98,9 @@ module Carto
           if message_callback
             begin
               payload = JSON.parse(received_message.data).with_indifferent_access
-              message_callback.call(payload)
+              ret = message_callback.call(payload)
               received_message.ack!
+              ret
             rescue StandardError => e
               log_error(message: 'Error in message processing callback',
                         exception: e,
