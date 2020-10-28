@@ -61,7 +61,7 @@ module Carto
           @pubsub = pubsub
           @project_id = project_id
           @topic_name = topic.to_s
-          @topic = @pubsub.topic("projects/#{@project_id}/topics/#{@topic_name}")
+          @topic = @pubsub.get_topic("projects/#{@project_id}/topics/#{@topic_name}")
         end
 
         def publish(event, payload)
