@@ -69,6 +69,8 @@ module Carto
       end
 
       class Subscription
+        include ::LoggerHelper
+
         def initialize(pubsub, project_id:, subscription_name:)
           @pubsub = pubsub
           @project_id = project_id
@@ -90,22 +92,31 @@ module Carto
               payload = JSON.parse(received_message.data).with_indifferent_access
               message_callback.call(payload)
               received_message.ack!
-            rescue StandardError => ex
-              puts ex
+            rescue StandardError => e
+              log_error(message: 'Error in message processing callback',
+                        exception: e,
+                        subscription_name: @subscription_name,
+                        message_type: message_type)
               received_message.ack!
             end
           else
-            puts "No callback registered for message #{message_type}"
+            log_warning(message: 'No callback registered for message',
+                        subscription_name: @subscription_name,
+                        message_type: message_type)
             received_message.reject!
           end
         end
 
         def start(options = {})
+          log_info(message: 'Starting message processing in subscriber',
+                   subscription_name: @subscription_name)
           @subscriber = @subscription.listen(options, &method(:main_callback))
           @subscriber.start
         end
 
         def stop!
+          log_info(message: 'Stopping message processing in subscriber',
+                   subscription_name: @subscription_name)
           @subscriber.stop!
         end
       end
