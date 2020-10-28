@@ -3,13 +3,13 @@ require 'singleton'
 
 module Carto
   module Common
-
     class MessageBroker
+
       include Singleton
 
       attr_reader :project_id
 
-      def initialize()
+      def initialize
         @config = Config.instance
         @project_id = @config.project_id
         @pubsub = Google::Cloud::Pubsub.new(project: @project_id)
@@ -24,7 +24,11 @@ module Carto
 
       def create_topic(topic)
         topic_name = topic.to_s
-        @pubsub.create_topic(topic_name) rescue Google::Cloud::AlreadyExistsError
+        begin
+          @pubsub.create_topic(topic_name)
+        rescue Google::Cloud::AlreadyExistsError
+          nil
+        end
         get_topic(topic_name)
       end
 
@@ -36,11 +40,12 @@ module Carto
       end
 
       class Config
+
         include Singleton
 
         attr_reader :project_id
 
-        def initialize()
+        def initialize
           if self.class.const_defined?(:Cartodb)
             config_module = Cartodb
           elsif self.class.const_defined?(:CartodbCentral)
@@ -52,9 +57,11 @@ module Carto
           config = config_module.config[:message_broker]
           @project_id = config['project_id']
         end
+
       end
 
       class Topic
+
         attr_reader :project_id, :topic_name
 
         def initialize(pubsub, project_id:, topic:)
@@ -65,18 +72,20 @@ module Carto
         end
 
         def publish(event, payload)
-          @topic.publish(payload.to_json, {event: event.to_s})
+          @topic.publish(payload.to_json, { event: event.to_s })
         end
 
         def create_subscription(subscription, options = {})
-          # TODO this shall return a wrapping subscription object (?)
+          # TODO: this shall return a wrapping subscription object (?)
           @topic.create_subscription(subscription.to_s, options)
         rescue Google::Cloud::AlreadyExistsError
           nil
         end
+
       end
 
       class Subscription
+
         include ::LoggerHelper
 
         def initialize(pubsub, project_id:, subscription_name:)
@@ -128,6 +137,7 @@ module Carto
                    subscription_name: @subscription_name)
           @subscriber.stop!
         end
+
       end
 
     end

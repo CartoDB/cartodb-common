@@ -15,9 +15,15 @@ RSpec.configure do |config|
 end
 
 module LoggerHelper
+
   def log_debug(params = {}); end
+
   def log_info(params = {}); end
+
   def log_warning(params = {}); end
+
   def log_error(params = {}); end
+
   def log_fatal(params = {}); end
+
 end

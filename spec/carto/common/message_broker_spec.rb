@@ -1,22 +1,40 @@
 require 'spec_helper'
 require 'carto/common/message_broker'
 
-
 # See https://relishapp.com/rspec/rspec-mocks/v/3-0/docs/verifying-doubles/dynamic-classes
+# rubocop:disable Lint/UselessMethodDefinition
 class PubsubDouble
+
   include Google::Cloud::Pubsub
-  def create_topic(*); super end
-  def get_topic(*); super end
-  def get_subscription(*); super end
+
+  def create_topic(*)
+    super
+  end
+
+  def get_topic(*)
+    super
+  end
+
+  def get_subscription(*)
+    super
+  end
+
 end
 
 class PubsubMessageDouble < Google::Cloud::Pubsub::Message
-  def ack!(*); super end
-  def reject!(*); super end
+
+  def ack!(*)
+    super
+  end
+
+  def reject!(*)
+    super
+  end
+
 end
+# rubocop:enable Lint/UselessMethodDefinition
 
 RSpec.describe Carto::Common::MessageBroker do
-
   before(:each) do
     Carto::Common::MessageBroker.instance_variable_set(:@singleton__instance__, nil)
   end
@@ -37,7 +55,9 @@ RSpec.describe Carto::Common::MessageBroker do
       pubsub = instance_double('Google::Cloud::Pubsub')
       allow(Carto::Common::MessageBroker::Config).to receive(:instance).and_return(config)
       allow(Google::Cloud::Pubsub).to receive(:new).with(project: 'test-project-id').and_return(pubsub)
-      expect(Carto::Common::MessageBroker::Topic).to receive(:new).with(pubsub, project_id: 'test-project-id', topic: 'dummy_topic')
+      expect(Carto::Common::MessageBroker::Topic).to receive(:new).with(pubsub,
+                                                                        project_id: 'test-project-id',
+                                                                        topic: 'dummy_topic')
       Carto::Common::MessageBroker.instance.get_topic(:dummy_topic)
     end
   end
@@ -59,12 +79,13 @@ RSpec.describe Carto::Common::MessageBroker do
   describe '#get_subscription' do
     it 'creates a wrapper subscription object and returns it' do
       pubsub = instance_double('PubsubDouble')
-      subscription = instance_double('Subscription')
 
       config = instance_double('Config', project_id: 'test-project-id')
       allow(Carto::Common::MessageBroker::Config).to receive(:instance).and_return(config)
       allow(Google::Cloud::Pubsub).to receive(:new).with(project: 'test-project-id').and_return(pubsub)
-      allow(Carto::Common::MessageBroker::Subscription).to receive(:new).with(pubsub, project_id: 'test-project-id', subscription_name: 'dummy_subscription')
+      allow(Carto::Common::MessageBroker::Subscription).to receive(:new).with(pubsub,
+                                                                              project_id: 'test-project-id',
+                                                                              subscription_name: 'dummy_subscription')
 
       Carto::Common::MessageBroker.instance.get_subscription(:dummy_subscription)
     end
@@ -95,7 +116,7 @@ RSpec.describe Carto::Common::MessageBroker::Config do
   end
 
   it 'raises an error if neither is defined' do
-    expect { Carto::Common::MessageBroker::Config.instance}.to raise_error "Couldn't find a suitable config module"
+    expect { Carto::Common::MessageBroker::Config.instance }.to raise_error "Couldn't find a suitable config module"
   end
 end
 
@@ -118,7 +139,7 @@ RSpec.describe Carto::Common::MessageBroker::Topic do
       allow(pubsub).to receive(:get_topic).with('projects/test-project-id/topics/my_topic').and_return(pubsub_topic)
       my_topic = Carto::Common::MessageBroker::Topic.new(pubsub, project_id: 'test-project-id', topic: :my_topic)
 
-      expect(pubsub_topic).to receive(:publish).with('{}', {event: 'test_event'})
+      expect(pubsub_topic).to receive(:publish).with('{}', { event: 'test_event' })
       my_topic.publish(:test_event, {})
     end
   end
@@ -142,29 +163,29 @@ RSpec.describe Carto::Common::MessageBroker::Subscription do
       pubsub = instance_double('PubsubDouble')
       expect(pubsub).to receive(:get_subscription).with('test_subscription', project: 'test-project-id')
 
-      subscription = Carto::Common::MessageBroker::Subscription.new(pubsub,
-                                                                    project_id: 'test-project-id',
-                                                                    subscription_name: 'test_subscription')
+      Carto::Common::MessageBroker::Subscription.new(pubsub,
+                                                     project_id: 'test-project-id',
+                                                     subscription_name: 'test_subscription')
     end
   end
 
   describe '#main_callback' do
     it 'dispatches messages to a registered callback' do
-        pubsub = instance_double('PubsubDouble')
-        expect(pubsub).to receive(:get_subscription).with('test_subscription', project: 'test-project-id')
+      pubsub = instance_double('PubsubDouble')
+      expect(pubsub).to receive(:get_subscription).with('test_subscription', project: 'test-project-id')
 
-        subscription = Carto::Common::MessageBroker::Subscription.new(pubsub,
-                                                                      project_id: 'test-project-id',
-                                                                      subscription_name: 'test_subscription')
-        subscription.register_callback(:dummy_command) do |payload|
-          'success!'
-        end
+      subscription = Carto::Common::MessageBroker::Subscription.new(pubsub,
+                                                                    project_id: 'test-project-id',
+                                                                    subscription_name: 'test_subscription')
+      subscription.register_callback(:dummy_command) do |_payload|
+        'success!'
+      end
 
-        message = instance_double('PubsubMessageDouble')
-        expect(message).to receive(:data).and_return('{}')
-        expect(message).to receive(:attributes).and_return({'event' => 'dummy_command'})
-        expect(message).to receive(:ack!)
-        expect(subscription.main_callback(message)).to eql 'success!'
+      message = instance_double('PubsubMessageDouble')
+      expect(message).to receive(:data).and_return('{}')
+      expect(message).to receive(:attributes).and_return({ 'event' => 'dummy_command' })
+      expect(message).to receive(:ack!)
+      expect(subscription.main_callback(message)).to eql 'success!'
     end
 
     it "rejects a message if there's no callback registered for it" do
@@ -176,7 +197,7 @@ RSpec.describe Carto::Common::MessageBroker::Subscription do
                                                                     subscription_name: 'test_subscription')
 
       message = instance_double('PubsubMessageDouble')
-      expect(message).to receive(:attributes).and_return({'event' => 'dummy_command'})
+      expect(message).to receive(:attributes).and_return({ 'event' => 'dummy_command' })
       expect(message).to receive(:reject!)
       expect(subscription.main_callback(message)).to eql nil
     end
@@ -188,13 +209,13 @@ RSpec.describe Carto::Common::MessageBroker::Subscription do
       subscription = Carto::Common::MessageBroker::Subscription.new(pubsub,
                                                                     project_id: 'test-project-id',
                                                                     subscription_name: 'test_subscription')
-      subscription.register_callback(:dummy_command) do |payload|
+      subscription.register_callback(:dummy_command) do
         raise 'unexpected exception'
       end
 
       message = instance_double('PubsubMessageDouble')
       expect(message).to receive(:data).and_return('{}')
-      expect(message).to receive(:attributes).and_return({'event' => 'dummy_command'})
+      expect(message).to receive(:attributes).and_return({ 'event' => 'dummy_command' })
       expect_any_instance_of(LoggerHelper).to receive(:log_error).once
       expect(message).to receive(:ack!)
       expect(subscription.main_callback(message)).to eql nil
