@@ -2,8 +2,8 @@ PATH
   remote: .
   specs:
     cartodb-common (0.3.6)
-      activesupport (~> 4.2.11.3)
-      argon2 (~> 2.0)
+      activesupport
+      argon2 (~> 2)
 
 GEM
   remote: https://rubygems.org/
@@ -124,12 +124,12 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  actionmailer (~> 4.2)
-  bundler (~> 2.0)
+  actionmailer
+  bundler (~> 2)
   byebug
   cartodb-common!
-  rake (~> 13.0)
-  rspec (~> 3.0)
+  rake (~> 13)
+  rspec (~> 3)
   rubocop
   rubocop-performance
   rubocop-rails
