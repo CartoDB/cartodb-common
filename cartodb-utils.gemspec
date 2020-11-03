@@ -21,6 +21,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'activesupport'
   spec.add_dependency 'argon2', '~> 2'
+  spec.add_dependency 'google-cloud-pubsub', '~> 1.2.0'
 
   spec.add_development_dependency 'actionmailer'
   spec.add_development_dependency 'bundler', '~> 2'
