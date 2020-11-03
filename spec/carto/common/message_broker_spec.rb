@@ -1,5 +1,6 @@
 require 'spec_helper'
 require 'carto/common/message_broker'
+require 'logger'
 
 # See https://relishapp.com/rspec/rspec-mocks/v/3-0/docs/verifying-doubles/dynamic-classes
 # rubocop:disable Lint/UselessMethodDefinition
@@ -158,6 +159,8 @@ RSpec.describe Carto::Common::MessageBroker::Topic do
 end
 
 RSpec.describe Carto::Common::MessageBroker::Subscription do
+  let(:logger) { instance_double('Logger') }
+
   describe '#initialize' do
     it 'delegates on the pubsub object to get the subscription' do
       pubsub = instance_double('PubsubDouble')
@@ -165,7 +168,8 @@ RSpec.describe Carto::Common::MessageBroker::Subscription do
 
       Carto::Common::MessageBroker::Subscription.new(pubsub,
                                                      project_id: 'test-project-id',
-                                                     subscription_name: 'test_subscription')
+                                                     subscription_name: 'test_subscription',
+                                                     logger: logger)
     end
   end
 
@@ -176,7 +180,8 @@ RSpec.describe Carto::Common::MessageBroker::Subscription do
 
       subscription = Carto::Common::MessageBroker::Subscription.new(pubsub,
                                                                     project_id: 'test-project-id',
-                                                                    subscription_name: 'test_subscription')
+                                                                    subscription_name: 'test_subscription',
+                                                                    logger: logger)
       subscription.register_callback(:dummy_command) do |_payload|
         'success!'
       end
@@ -194,9 +199,11 @@ RSpec.describe Carto::Common::MessageBroker::Subscription do
 
       subscription = Carto::Common::MessageBroker::Subscription.new(pubsub,
                                                                     project_id: 'test-project-id',
-                                                                    subscription_name: 'test_subscription')
+                                                                    subscription_name: 'test_subscription',
+                                                                    logger: logger)
 
       message = instance_double('PubsubMessageDouble')
+      expect(logger).to receive(:warn)
       expect(message).to receive(:attributes).and_return({ 'event' => 'dummy_command' })
       expect(message).to receive(:reject!)
       expect(subscription.main_callback(message)).to eql nil
@@ -208,7 +215,8 @@ RSpec.describe Carto::Common::MessageBroker::Subscription do
 
       subscription = Carto::Common::MessageBroker::Subscription.new(pubsub,
                                                                     project_id: 'test-project-id',
-                                                                    subscription_name: 'test_subscription')
+                                                                    subscription_name: 'test_subscription',
+                                                                    logger: logger)
       subscription.register_callback(:dummy_command) do
         raise 'unexpected exception'
       end
@@ -216,7 +224,7 @@ RSpec.describe Carto::Common::MessageBroker::Subscription do
       message = instance_double('PubsubMessageDouble')
       expect(message).to receive(:data).and_return('{}')
       expect(message).to receive(:attributes).and_return({ 'event' => 'dummy_command' })
-      expect_any_instance_of(LoggerHelper).to receive(:log_error).once
+      expect(logger).to receive(:error)
       expect(message).to receive(:ack!)
       expect(subscription.main_callback(message)).to eql nil
     end
