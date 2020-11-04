@@ -86,15 +86,16 @@ module Carto
 
       class Subscription
 
-        include ::LoggerHelper
+        attr_reader :logger
 
-        def initialize(pubsub, project_id:, subscription_name:)
+        def initialize(pubsub, project_id:, subscription_name:, logger: nil)
           @pubsub = pubsub
           @project_id = project_id
           @subscription_name = subscription_name
           @subscription = @pubsub.get_subscription(subscription_name, project: project_id)
           @callbacks = {}
           @subscriber = nil
+          @logger = logger || Rails.logger
         end
 
         def register_callback(message_type, &block)
@@ -111,14 +112,18 @@ module Carto
               received_message.ack!
               ret
             rescue StandardError => e
-              log_error(message: 'Error in message processing callback',
-                        exception: e,
-                        subscription_name: @subscription_name,
-                        message_type: message_type)
+              logger.error(message: 'Error in message processing callback',
+                           exception: {
+                             class: e.class.name,
+                             message: e.message,
+                             backtrace_hint: e.backtrace&.take(5)
+                           },
+                           subscription_name: @subscription_name,
+                           message_type: message_type)
               received_message.ack!
             end
           else
-            log_warning(message: 'No callback registered for message',
+            logger.warn(message: 'No callback registered for message',
                         subscription_name: @subscription_name,
                         message_type: message_type)
             received_message.reject!
@@ -126,15 +131,15 @@ module Carto
         end
 
         def start(options = {})
-          log_info(message: 'Starting message processing in subscriber',
-                   subscription_name: @subscription_name)
+          logger.info(message: 'Starting message processing in subscriber',
+                      subscription_name: @subscription_name)
           @subscriber = @subscription.listen(options, &method(:main_callback))
           @subscriber.start
         end
 
         def stop!
-          log_info(message: 'Stopping message processing in subscriber',
-                   subscription_name: @subscription_name)
+          logger.info(message: 'Stopping message processing in subscriber',
+                      subscription_name: @subscription_name)
           @subscriber.stop!
         end
 
