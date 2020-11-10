@@ -19,16 +19,16 @@ Gem::Specification.new do |spec|
     `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^spec/}) }
   end
 
-  spec.add_dependency 'activesupport'
+  spec.add_dependency 'activesupport', '>= 4', '< 6'
   spec.add_dependency 'argon2', '~> 2'
-  spec.add_dependency 'google-cloud-pubsub', '~> 1.2.0'
+  spec.add_dependency 'google-cloud-pubsub', '~> 1.2'
 
   spec.add_development_dependency 'actionmailer'
   spec.add_development_dependency 'bundler', '~> 2'
   spec.add_development_dependency 'byebug'
   spec.add_development_dependency 'rake', '~> 13'
   spec.add_development_dependency 'rspec', '~> 3'
-  spec.add_development_dependency 'rubocop'
+  spec.add_development_dependency 'rubocop', '~> 0.93'
   spec.add_development_dependency 'rubocop-performance'
   spec.add_development_dependency 'rubocop-rails'
   spec.add_development_dependency 'rubocop-rspec'
