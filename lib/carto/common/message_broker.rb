@@ -43,8 +43,6 @@ module Carto
 
         include Singleton
 
-        attr_reader :project_id
-
         def initialize
           if self.class.const_defined?(:Cartodb)
             config_module = Cartodb
@@ -54,8 +52,11 @@ module Carto
             raise "Couldn't find a suitable config module"
           end
 
-          config = config_module.config[:message_broker]
-          @project_id = config['project_id']
+          @config = config_module.config[:message_broker]
+        end
+
+        def method_missing(setting_name)
+          @config[setting_name.to_s]
         end
 
       end
