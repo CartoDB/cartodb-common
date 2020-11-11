@@ -59,6 +59,10 @@ module Carto
           @config[setting_name.to_s]
         end
 
+        def respond_to_missing?
+          true
+        end
+
       end
 
       class Topic

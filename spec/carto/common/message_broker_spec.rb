@@ -130,7 +130,7 @@ RSpec.describe Carto::Common::MessageBroker::Config do
         }
       }
     end
-    expect(Carto::Common::MessageBroker::Config.instance.central_commands_subscription)
+    expect(described_class.instance.central_commands_subscription)
       .to eql 'test-subscription-name'
   end
 end
