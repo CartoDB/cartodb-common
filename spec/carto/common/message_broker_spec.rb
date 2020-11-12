@@ -120,7 +120,7 @@ RSpec.describe Carto::Common::MessageBroker::Config do
     expect { Carto::Common::MessageBroker::Config.instance }.to raise_error "Couldn't find a suitable config module"
   end
 
-  it 'allows to read other config settings other than project_id' do
+  it 'allows to read other central_commands_subscription config setting' do
     config_module = Object.const_set(:Cartodb, Module.new)
     config_module.define_singleton_method(:config) do
       {
