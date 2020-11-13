@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    cartodb-common (0.4.3)
+    cartodb-common (0.4.4)
       activesupport (>= 4, < 6)
       argon2 (~> 2)
       google-cloud-pubsub (~> 1.2)
