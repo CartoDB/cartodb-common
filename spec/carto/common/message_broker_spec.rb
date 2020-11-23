@@ -95,7 +95,7 @@ end
 
 RSpec.describe Carto::Common::MessageBroker::Config do
   before(:each) do
-    Carto::Common::MessageBroker::Config.instance_variable_set(:@singleton__instance__, nil)
+    described_class.instance_variable_set(:@singleton__instance__, nil)
     Object.send(:remove_const, :Cartodb) if Object.constants.include?(:Cartodb)
     Object.send(:remove_const, :CartodbCentral) if Object.constants.include?(:CartodbCentral)
   end
@@ -105,7 +105,7 @@ RSpec.describe Carto::Common::MessageBroker::Config do
     config_module.define_singleton_method(:config) do
       { message_broker: { 'project_id' => 'test-project-id' } }
     end
-    expect(Carto::Common::MessageBroker::Config.instance.project_id).to eql 'test-project-id'
+    expect(described_class.instance.project_id).to eql 'test-project-id'
   end
 
   it 'uses CartodbCentral config module if it exists' do
@@ -113,11 +113,11 @@ RSpec.describe Carto::Common::MessageBroker::Config do
     config_module.define_singleton_method(:config) do
       { message_broker: { 'project_id' => 'test-project-id' } }
     end
-    expect(Carto::Common::MessageBroker::Config.instance.project_id).to eql 'test-project-id'
+    expect(described_class.instance.project_id).to eql 'test-project-id'
   end
 
   it 'raises an error if neither is defined' do
-    expect { Carto::Common::MessageBroker::Config.instance }.to raise_error "Couldn't find a suitable config module"
+    expect { described_class.instance }.to raise_error "Couldn't find a suitable config module"
   end
 
   it 'allows to read other central_commands_subscription config setting' do
@@ -139,7 +139,7 @@ RSpec.describe Carto::Common::MessageBroker::Config do
     config_module.define_singleton_method(:config) do
       { message_broker: {} }
     end
-    expect(Carto::Common::MessageBroker::Config.instance.enabled?).to be false
+    expect(described_class.instance.enabled?).to be false
   end
 
   it 'enabled? returns true when set to true' do
@@ -147,7 +147,7 @@ RSpec.describe Carto::Common::MessageBroker::Config do
     config_module.define_singleton_method(:config) do
       { message_broker: { 'enabled' => true } }
     end
-    expect(Carto::Common::MessageBroker::Config.instance.enabled?).to be true
+    expect(described_class.instance.enabled?).to be true
   end
 
   it 'enabled? returns false when set to false' do
@@ -155,7 +155,7 @@ RSpec.describe Carto::Common::MessageBroker::Config do
     config_module.define_singleton_method(:config) do
       { message_broker: { 'enabled' => false } }
     end
-    expect(Carto::Common::MessageBroker::Config.instance.enabled?).to be false
+    expect(described_class.instance.enabled?).to be false
   end
 end
 
