@@ -133,6 +133,30 @@ RSpec.describe Carto::Common::MessageBroker::Config do
     expect(described_class.instance.central_commands_subscription)
       .to eql 'test-subscription-name'
   end
+
+  it 'enabled? returns false if not defined' do
+    config_module = Object.const_set(:CartodbCentral, Module.new)
+    config_module.define_singleton_method(:config) do
+      { message_broker: {} }
+    end
+    expect(Carto::Common::MessageBroker::Config.instance.enabled?).to be false
+  end
+
+  it 'enabled? returns true when set to true' do
+    config_module = Object.const_set(:CartodbCentral, Module.new)
+    config_module.define_singleton_method(:config) do
+      { message_broker: { 'enabled' => true } }
+    end
+    expect(Carto::Common::MessageBroker::Config.instance.enabled?).to be true
+  end
+
+  it 'enabled? returns false when set to false' do
+    config_module = Object.const_set(:CartodbCentral, Module.new)
+    config_module.define_singleton_method(:config) do
+      { message_broker: { 'enabled' => false } }
+    end
+    expect(Carto::Common::MessageBroker::Config.instance.enabled?).to be false
+  end
 end
 
 RSpec.describe Carto::Common::MessageBroker::Topic do

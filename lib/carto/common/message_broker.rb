@@ -58,6 +58,11 @@ module Carto
           config = config_module.config[:message_broker]
           @project_id = config['project_id']
           @central_commands_subscription = config['central_commands_subscription']
+          @enabled = config['enabled']
+        end
+
+        def enabled?
+          @enabled || false
         end
 
       end
