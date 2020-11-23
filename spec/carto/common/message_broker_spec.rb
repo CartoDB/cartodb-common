@@ -134,28 +134,30 @@ RSpec.describe Carto::Common::MessageBroker::Config do
       .to eql 'test-subscription-name'
   end
 
-  it 'enabled? returns false if not defined' do
-    config_module = Object.const_set(:CartodbCentral, Module.new)
-    config_module.define_singleton_method(:config) do
-      { message_broker: {} }
+  describe '#enabled?' do
+    it 'returns false if not defined' do
+      config_module = Object.const_set(:CartodbCentral, Module.new)
+      config_module.define_singleton_method(:config) do
+        { message_broker: {} }
+      end
+      expect(described_class.instance.enabled?).to be false
     end
-    expect(described_class.instance.enabled?).to be false
-  end
 
-  it 'enabled? returns true when set to true' do
-    config_module = Object.const_set(:CartodbCentral, Module.new)
-    config_module.define_singleton_method(:config) do
-      { message_broker: { 'enabled' => true } }
+    it 'returns true when set to true' do
+      config_module = Object.const_set(:CartodbCentral, Module.new)
+      config_module.define_singleton_method(:config) do
+        { message_broker: { 'enabled' => true } }
+      end
+      expect(described_class.instance.enabled?).to be true
     end
-    expect(described_class.instance.enabled?).to be true
-  end
 
-  it 'enabled? returns false when set to false' do
-    config_module = Object.const_set(:CartodbCentral, Module.new)
-    config_module.define_singleton_method(:config) do
-      { message_broker: { 'enabled' => false } }
+    it 'returns false when set to false' do
+      config_module = Object.const_set(:CartodbCentral, Module.new)
+      config_module.define_singleton_method(:config) do
+        { message_broker: { 'enabled' => false } }
+      end
+      expect(described_class.instance.enabled?).to be false
     end
-    expect(described_class.instance.enabled?).to be false
   end
 end
 
