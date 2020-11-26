@@ -54,7 +54,7 @@ RSpec.describe Carto::Common::MessageBroker::Subscription do
       expect(logger).to receive(:warn)
       expect(message).to receive(:attributes).and_return({ 'event' => 'dummy_command' })
       expect(message).to receive(:reject!)
-      expect(subscription.main_callback(message)).to eql nil
+      expect(subscription.main_callback(message)).to be_nil
     end
 
     it "logs an error if there's an unexpected exception within the callback, but acknowledges the message" do
@@ -76,7 +76,7 @@ RSpec.describe Carto::Common::MessageBroker::Subscription do
       expect(message).to receive(:attributes).and_return({ 'event' => 'dummy_command' })
       expect(logger).to receive(:error)
       expect(message).to receive(:ack!)
-      expect(subscription.main_callback(message)).to eql nil
+      expect(subscription.main_callback(message)).to be_nil
     end
   end
 end
