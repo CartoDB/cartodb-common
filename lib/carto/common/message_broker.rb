@@ -89,6 +89,10 @@ module Carto
           nil
         end
 
+        def delete
+          @topic.delete
+        end
+
       end
 
       class Subscription
@@ -103,6 +107,10 @@ module Carto
           @callbacks = {}
           @subscriber = nil
           @logger = logger || ::Logger.new($stdout)
+        end
+
+        def delete
+          @subscription.delete
         end
 
         def register_callback(message_type, &block)
