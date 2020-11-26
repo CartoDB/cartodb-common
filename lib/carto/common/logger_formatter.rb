@@ -16,6 +16,18 @@ module Carto
             )
           )
         )
+
+        # Serialize Exception objects
+        exception = message_hash[:exception]
+        if exception&.is_a?(Exception)
+          message_hash[:exception] = {
+            class: exception.class.name,
+            message: exception.message,
+            backtrace_hint: Rails.env.production? ? exception.backtrace&.take(10) : exception.backtrace
+          }
+          message_hash[:message] = exception.message if message_hash[:message].blank?
+        end
+
         replace_key(message_hash, :current_user, :'cdb-user')
         replace_key(message_hash, :message, :event_message)
 
