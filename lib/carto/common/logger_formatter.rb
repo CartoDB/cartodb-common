@@ -19,7 +19,7 @@ module Carto
 
         # Serialize Exception objects
         exception = message_hash[:exception]
-        if exception&.is_a?(Exception)
+        if exception.is_a?(Exception)
           message_hash[:exception] = {
             class: exception.class.name,
             message: exception.message,
