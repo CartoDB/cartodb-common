@@ -23,7 +23,7 @@ module Carto
           message_hash[:exception] = {
             class: exception.class.name,
             message: exception.message,
-            backtrace_hint: Rails.env.production? ? exception.backtrace&.take(10) : exception.backtrace
+            backtrace_hint: production_environment? ? exception.backtrace&.take(10) : exception.backtrace
           }
           message_hash[:message] = exception.message if message_hash[:message].blank?
         end
@@ -44,7 +44,11 @@ module Carto
       end
 
       def development_environment?
-        ENV['RAILS_ENV'].to_s.downcase == 'development'
+        ENV['RAILS_ENV'].to_s.casecmp('development').zero?
+      end
+
+      def production_environment?
+        ENV['RAILS_ENV'].to_s.casecmp('production').zero?
       end
 
       def replace_key(message_hash, old_key, new_key)
