@@ -3,9 +3,19 @@ require 'singleton'
 
 module Carto
   module Common
-    class MessageBroker
+
+    module MessageBrokerPrefix
 
       PREFIX = 'broker_'.freeze
+
+      def pubsub_prefixed_name(input_symbol_or_string)
+        PREFIX + input_symbol_or_string.to_s
+      end
+
+    end
+
+    class MessageBroker
+      include MessageBrokerPrefix
 
       attr_reader :logger, :project_id
 
@@ -20,7 +30,7 @@ module Carto
 
       def get_topic(topic)
         topic_name = pubsub_prefixed_name(topic)
-        @topics[topic_name] ||= Topic.new(@pubsub, project_id: @project_id, topic: topic_name)
+        @topics[topic_name] ||= Topic.new(@pubsub, project_id: @project_id, topic_name: topic_name)
       end
 
       def create_topic(topic)
@@ -39,10 +49,6 @@ module Carto
                                                           project_id: @project_id,
                                                           subscription_name: subscription_name,
                                                           logger: logger)
-      end
-
-      def self.pubsub_prefixed_name(input_symbol_or_string)
-        PREFIX + input_symbol_or_string.to_s
       end
 
       class Config
@@ -77,10 +83,10 @@ module Carto
 
         attr_reader :project_id, :topic_name
 
-        def initialize(pubsub, project_id:, topic:)
+        def initialize(pubsub, project_id:, topic_name:)
           @pubsub = pubsub
           @project_id = project_id
-          @topic_name = pubsub_prefixed_name(topic)
+          @topic_name = topic_name
           @topic = @pubsub.get_topic("projects/#{@project_id}/topics/#{@topic_name}")
         end
 
