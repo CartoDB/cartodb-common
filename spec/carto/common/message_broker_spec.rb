@@ -64,5 +64,26 @@ RSpec.describe Carto::Common::MessageBroker do
 
       message_broker.get_subscription(:dummy_subscription)
     end
+
+    it 'propagates the specified logger to the subscriptions' do
+      gcloud_subscriber = instance_double(Google::Cloud::PubSub::Subscriber)
+      allow(gcloud_subscriber).to receive(:start)
+
+      gcloud_subscription = instance_double(Google::Cloud::PubSub::Subscription)
+      allow(gcloud_subscription).to receive(:listen).and_return(gcloud_subscriber)
+
+      pubsub = instance_double('PubsubDouble')
+      allow(pubsub).to receive(:get_subscription).and_return(gcloud_subscription)
+
+      config = instance_double('Config', project_id: 'test-project-id')
+      allow(Carto::Common::MessageBroker::Config).to receive(:instance).and_return(config)
+      allow(Google::Cloud::Pubsub).to receive(:new).with(project: 'test-project-id').and_return(pubsub)
+
+      subscription = message_broker.get_subscription(:dummy_subscription)
+
+      expect(logger).to receive(:info).with(hash_including(message: 'Starting message processing in subscriber'))
+
+      subscription.start
+    end
   end
 end
