@@ -13,7 +13,7 @@ module Carto
         @pubsub = Google::Cloud::Pubsub.new(project: @project_id)
         @topics = {}
         @subscriptions = {}
-        @logger = logger || ::Logger.new
+        @logger = logger || ::Logger.new($stdout)
       end
 
       def get_topic(topic)
@@ -102,7 +102,7 @@ module Carto
           @subscription = @pubsub.get_subscription(subscription_name, project: project_id)
           @callbacks = {}
           @subscriber = nil
-          @logger = logger || ::Logger.new
+          @logger = logger || ::Logger.new($stdout)
         end
 
         def register_callback(message_type, &block)
