@@ -5,16 +5,15 @@ module Carto
   module Common
     class MessageBroker
 
-      include Singleton
+      attr_reader :logger, :project_id
 
-      attr_reader :project_id
-
-      def initialize
+      def initialize(logger:)
         @config = Config.instance
         @project_id = @config.project_id
         @pubsub = Google::Cloud::Pubsub.new(project: @project_id)
         @topics = {}
         @subscriptions = {}
+        @logger = logger || ::Logger.new($stdout)
       end
 
       def get_topic(topic)
@@ -36,7 +35,8 @@ module Carto
         subscription_name = subscription.to_s
         @subscriptions[subscription] ||= Subscription.new(@pubsub,
                                                           project_id: @project_id,
-                                                          subscription_name: subscription_name)
+                                                          subscription_name: subscription_name,
+                                                          logger: logger)
       end
 
       class Config
@@ -102,7 +102,7 @@ module Carto
           @subscription = @pubsub.get_subscription(subscription_name, project: project_id)
           @callbacks = {}
           @subscriber = nil
-          @logger = logger || Rails.logger
+          @logger = logger || ::Logger.new($stdout)
         end
 
         def register_callback(message_type, &block)

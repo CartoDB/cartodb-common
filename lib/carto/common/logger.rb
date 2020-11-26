@@ -7,7 +7,7 @@ module Carto
   module Common
     class Logger < ActiveSupport::Logger
 
-      def initialize(output_stream)
+      def initialize(output_stream = $stdout)
         super(output_stream)
         self.formatter = Carto::Common::LoggerFormatter.new
       end

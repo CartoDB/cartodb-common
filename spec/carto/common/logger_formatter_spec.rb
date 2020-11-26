@@ -82,6 +82,28 @@ RSpec.describe Carto::Common::LoggerFormatter do
     end
   end
 
+  context 'when serializing exceptions' do
+    let(:exception) { StandardError.new('Error body') }
+    let(:output) { subject.call(severity, time, progname, { exception: exception }) }
+    let(:parsed_output) { JSON.parse(output) }
+
+    it 'outputs the exception class' do
+      expect(parsed_output['exception']['class']).to eq('StandardError')
+    end
+
+    it 'outputs the exception message' do
+      expect(parsed_output['exception']['message']).to eq('Error body')
+    end
+
+    it 'outputs the exception backtrace' do
+      expect(parsed_output['exception']['backtrace']).to be_nil
+    end
+
+    it 'outputs the exception message as event_message if the latter is empty' do
+      expect(parsed_output['event_message']).to eq('Error body')
+    end
+  end
+
   it 'renames current_user to cdb-user' do
     output = subject.call(severity, time, progname, { message: 'Something!', current_user: 'peter' })
     parsed_output = JSON.parse(output)
