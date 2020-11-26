@@ -3,6 +3,10 @@ require 'carto/common/message_broker'
 require 'logger'
 
 RSpec.describe Carto::Common::MessageBroker do
+  subject(:message_broker) { described_class.new(logger: logger) }
+
+  let(:logger) { ::Logger.new($stdout) }
+
   before do
     described_class.instance_variable_set(:@singleton__instance__, nil)
   end
@@ -13,7 +17,7 @@ RSpec.describe Carto::Common::MessageBroker do
       expect(Carto::Common::MessageBroker::Config).to receive(:instance).and_return(config)
       expect(Google::Cloud::Pubsub).to receive(:new).with(project: 'test-project-id')
 
-      expect(described_class.instance.project_id).to eql 'test-project-id'
+      expect(message_broker.project_id).to eql 'test-project-id'
     end
   end
 
@@ -26,7 +30,7 @@ RSpec.describe Carto::Common::MessageBroker do
       expect(Carto::Common::MessageBroker::Topic).to receive(:new).with(pubsub,
                                                                         project_id: 'test-project-id',
                                                                         topic: 'dummy_topic')
-      described_class.instance.get_topic(:dummy_topic)
+      message_broker.get_topic(:dummy_topic)
     end
   end
 
@@ -40,7 +44,7 @@ RSpec.describe Carto::Common::MessageBroker do
       allow(Google::Cloud::Pubsub).to receive(:new).with(project: 'test-project-id').and_return(pubsub)
       expect(pubsub).to receive(:create_topic).with('dummy_topic')
       expect(Carto::Common::MessageBroker::Topic).to receive(:new).and_return(topic)
-      expect(described_class.instance.create_topic(:dummy_topic)).to eql topic
+      expect(message_broker.create_topic(:dummy_topic)).to eql topic
     end
   end
 
@@ -51,11 +55,14 @@ RSpec.describe Carto::Common::MessageBroker do
       config = instance_double('Config', project_id: 'test-project-id')
       allow(Carto::Common::MessageBroker::Config).to receive(:instance).and_return(config)
       allow(Google::Cloud::Pubsub).to receive(:new).with(project: 'test-project-id').and_return(pubsub)
-      allow(Carto::Common::MessageBroker::Subscription).to receive(:new).with(pubsub,
-                                                                              project_id: 'test-project-id',
-                                                                              subscription_name: 'dummy_subscription')
+      allow(Carto::Common::MessageBroker::Subscription).to(
+        receive(:new).with(
+          pubsub,
+          hash_including(project_id: 'test-project-id', subscription_name: 'dummy_subscription')
+        )
+      )
 
-      described_class.instance.get_subscription(:dummy_subscription)
+      message_broker.get_subscription(:dummy_subscription)
     end
   end
 end
