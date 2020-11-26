@@ -15,6 +15,7 @@ module Carto
     end
 
     class MessageBroker
+
       include MessageBrokerPrefix
 
       attr_reader :logger, :project_id
@@ -80,6 +81,8 @@ module Carto
       end
 
       class Topic
+
+        include MessageBrokerPrefix
 
         attr_reader :project_id, :topic_name
 
