@@ -74,14 +74,18 @@ module Carto
 
       private
 
-      def send_exception_to_rollbar(params)
-        exception = params[:exception]
-        message = params[:message]
+      def send_exception_to_rollbar(params = {})
+        if params.is_a?(Hash)
+          exception = params[:exception]
+          message = params[:message]
 
-        if message && exception && exception.is_a?(Exception)
-          Rollbar.error(exception, message)
+          if message && exception && exception.is_a?(Exception)
+            Rollbar.error(exception, message)
+          else
+            Rollbar.error(exception || message)
+          end
         else
-          Rollbar.error(exception || message)
+          Rollbar.error(params)
         end
       end
 
