@@ -1,5 +1,6 @@
 require "bundler/setup"
 require "carto/common/encryption_service"
+require 'carto/common/logger'
 require "carto/common/logger_formatter"
 require 'google/cloud/pubsub'
 

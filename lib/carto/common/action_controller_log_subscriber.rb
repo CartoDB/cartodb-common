@@ -1,4 +1,5 @@
-require "action_controller/log_subscriber"
+require 'action_controller'
+require 'action_controller/log_subscriber'
 
 ##
 # Extends ActionController::LogSubscriber to improve JSON logging capabilities
