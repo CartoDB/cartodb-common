@@ -1,3 +1,5 @@
+require 'rails'
+
 ##
 # Extends Rails::Rack::Logger to support CARTO JSON logging schema
 # Original source: https://github.com/rails/rails/blob/master/railties/lib/rails/rack/logger.rb
