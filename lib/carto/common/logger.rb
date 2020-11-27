@@ -1,3 +1,5 @@
+require 'rollbar'
+
 require_relative 'action_controller_log_subscriber'
 require_relative 'action_mailer_log_subscriber'
 require_relative 'logger_formatter'
@@ -6,11 +8,6 @@ require_relative 'rack_logger_middleware'
 module Carto
   module Common
     class Logger < ActiveSupport::Logger
-
-      def initialize(output_stream = $stdout)
-        super(output_stream)
-        self.formatter = Carto::Common::LoggerFormatter.new
-      end
 
       ##
       # Removes Rails default log subscribers and replaces with the CARTO custom ones
@@ -59,6 +56,34 @@ module Carto
         end
       end
       private_class_method :unsubscribe
+
+      def initialize(output_stream = $stdout)
+        super(output_stream)
+        self.formatter = Carto::Common::LoggerFormatter.new
+      end
+
+      def error(params = {})
+        super(params)
+        send_exception_to_rollbar(params)
+      end
+
+      def fatal(params = {})
+        super(params)
+        send_exception_to_rollbar(params)
+      end
+
+      private
+
+      def send_exception_to_rollbar(params)
+        exception = params[:exception]
+        message = params[:message]
+
+        if message && exception && exception.is_a?(Exception)
+          Rollbar.error(exception, message)
+        else
+          Rollbar.error(exception || message)
+        end
+      end
 
     end
   end
