@@ -3,7 +3,20 @@ require 'singleton'
 
 module Carto
   module Common
+
+    module MessageBrokerPrefix
+
+      PREFIX = 'broker_'.freeze
+
+      def pubsub_prefixed_name(input_symbol_or_string)
+        PREFIX + input_symbol_or_string.to_s
+      end
+
+    end
+
     class MessageBroker
+
+      include MessageBrokerPrefix
 
       attr_reader :logger, :project_id
 
@@ -17,12 +30,12 @@ module Carto
       end
 
       def get_topic(topic)
-        topic_name = topic.to_s
-        @topics[topic_name] ||= Topic.new(@pubsub, project_id: @project_id, topic: topic_name)
+        topic_name = pubsub_prefixed_name(topic)
+        @topics[topic_name] ||= Topic.new(@pubsub, project_id: @project_id, topic_name: topic_name)
       end
 
       def create_topic(topic)
-        topic_name = topic.to_s
+        topic_name = pubsub_prefixed_name(topic)
         begin
           @pubsub.create_topic(topic_name)
         rescue Google::Cloud::AlreadyExistsError
@@ -32,7 +45,7 @@ module Carto
       end
 
       def get_subscription(subscription)
-        subscription_name = subscription.to_s
+        subscription_name = pubsub_prefixed_name(subscription)
         @subscriptions[subscription] ||= Subscription.new(@pubsub,
                                                           project_id: @project_id,
                                                           subscription_name: subscription_name,
@@ -69,12 +82,14 @@ module Carto
 
       class Topic
 
+        include MessageBrokerPrefix
+
         attr_reader :project_id, :topic_name
 
-        def initialize(pubsub, project_id:, topic:)
+        def initialize(pubsub, project_id:, topic_name:)
           @pubsub = pubsub
           @project_id = project_id
-          @topic_name = topic.to_s
+          @topic_name = topic_name
           @topic = @pubsub.get_topic("projects/#{@project_id}/topics/#{@topic_name}")
         end
 
@@ -84,7 +99,8 @@ module Carto
 
         def create_subscription(subscription, options = {})
           # TODO: this shall return a wrapping subscription object (?)
-          @topic.create_subscription(subscription.to_s, options)
+          subscription_name = pubsub_prefixed_name(subscription)
+          @topic.create_subscription(subscription_name, options)
         rescue Google::Cloud::AlreadyExistsError
           nil
         end
