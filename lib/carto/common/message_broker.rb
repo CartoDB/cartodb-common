@@ -41,7 +41,7 @@ module Carto
         rescue Google::Cloud::AlreadyExistsError
           nil
         end
-        get_topic(topic_name)
+        get_topic(topic)
       end
 
       def get_subscription(subscription)
