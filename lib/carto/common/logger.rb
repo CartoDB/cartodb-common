@@ -63,13 +63,25 @@ module Carto
       end
 
       def error(params = {})
+        rollbar = if params.is_a?(Hash)
+                    params.delete(:rollbar) != false
+                  else
+                    true
+                  end
+
         super(params)
-        send_exception_to_rollbar(params)
+        send_exception_to_rollbar(params) if rollbar
       end
 
       def fatal(params = {})
+        rollbar = if params.is_a?(Hash)
+                    params.delete(:rollbar) != false
+                  else
+                    true
+                  end
+
         super(params)
-        send_exception_to_rollbar(params)
+        send_exception_to_rollbar(params) if rollbar
       end
 
       private
