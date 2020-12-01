@@ -18,6 +18,12 @@ RSpec.describe Carto::Common::Logger do
 
       logger.error(message)
     end
+
+    it 'allows skipping logging to Rollbar' do
+      expect(Rollbar).not_to receive(:error)
+
+      logger.error(message: message, rollbar: false)
+    end
   end
 
   describe '#fatal' do
@@ -30,7 +36,13 @@ RSpec.describe Carto::Common::Logger do
     it 'logs simple messages to Rollbar' do
       expect(Rollbar).to receive(:error).with(message)
 
-      logger.error(message)
+      logger.fatal(message)
+    end
+
+    it 'allows skipping logging to Rollbar' do
+      expect(Rollbar).not_to receive(:error)
+
+      logger.fatal(message: message, rollbar: false)
     end
   end
 end

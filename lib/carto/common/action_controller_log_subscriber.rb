@@ -41,7 +41,11 @@ module Carto
         end
         log_entry.merge!(status: status, status_text: Rack::Utils::HTTP_STATUS_CODES[status])
 
-        exception.present? || status.to_s.match?(/5\d\d/) ? error(log_entry) : info(log_entry)
+        if exception.present? || status.to_s.match?(/5\d\d/)
+          error(log_entry.merge(rollbar: false))
+        else
+          info(log_entry)
+        end
       end
 
       def halted_callback(event)
