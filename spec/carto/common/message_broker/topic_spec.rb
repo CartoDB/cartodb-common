@@ -25,25 +25,23 @@ RSpec.describe Carto::Common::MessageBroker::Topic do
   end
 
   describe '#create_subscription' do
-    it 'delegates on the pubsub topic instance to create subscriptions' do
-      pubsub = instance_double('PubsubDouble')
-      pubsub_topic = instance_double('Google::Cloud::Pubsub::Topic')
-      allow(pubsub).to receive(:get_topic).with('projects/test-project-id/topics/my_topic').and_return(pubsub_topic)
-      my_topic = described_class.new(pubsub, project_id: 'test-project-id', topic_name: 'my_topic')
+    let(:pubsub) { instance_double('PubsubDouble') }
+    let(:pubsub_topic) { instance_double('Google::Cloud::Pubsub::Topic') }
+    let(:my_topic) { described_class.new(pubsub, project_id: 'test-project-id', topic_name: 'my_topic') }
 
+    it 'delegates on the pubsub topic instance to create subscriptions' do
+      allow(pubsub).to receive(:get_topic).with('projects/test-project-id/topics/my_topic').and_return(pubsub_topic)
       expect(pubsub_topic).to receive(:create_subscription).with('broker_my_subscription', {})
       expect(pubsub).to receive(:get_subscription).with('broker_my_subscription', project: 'test-project-id')
+
       my_topic.create_subscription(:my_subscription)
     end
 
     it 'returns a wrapping subscription object' do
-      pubsub = instance_double('PubsubDouble')
-      pubsub_topic = instance_double('Google::Cloud::Pubsub::Topic')
       allow(pubsub).to receive(:get_topic).with('projects/test-project-id/topics/my_topic').and_return(pubsub_topic)
-      my_topic = described_class.new(pubsub, project_id: 'test-project-id', topic_name: 'my_topic')
-
       expect(pubsub_topic).to receive(:create_subscription).with('broker_my_subscription', {})
       expect(pubsub).to receive(:get_subscription).with('broker_my_subscription', project: 'test-project-id')
+
       expect(my_topic.create_subscription(:my_subscription)).to be_a(Carto::Common::MessageBroker::Subscription)
     end
   end
