@@ -16,6 +16,8 @@ module Carto
 
     class MessageBroker
 
+      SUBSCRIPTION_ACK_DEADLINE_SECONDS = 300
+
       include MessageBrokerPrefix
 
       attr_reader :logger, :project_id
@@ -97,10 +99,11 @@ module Carto
           @topic.publish(payload.to_json, { event: event.to_s })
         end
 
-        def create_subscription(subscription, options = {})
+        def create_subscription(subscription)
           begin
             subscription_name = pubsub_prefixed_name(subscription)
-            @topic.create_subscription(subscription_name, options)
+            @topic.create_subscription(subscription_name,
+                                       deadline: SUBSCRIPTION_ACK_DEADLINE_SECONDS)
           rescue Google::Cloud::AlreadyExistsError
             nil
           end

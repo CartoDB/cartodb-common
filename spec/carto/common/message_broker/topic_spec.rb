@@ -31,7 +31,7 @@ RSpec.describe Carto::Common::MessageBroker::Topic do
 
     it 'delegates on the pubsub topic instance to create subscriptions' do
       allow(pubsub).to receive(:get_topic).with('projects/test-project-id/topics/my_topic').and_return(pubsub_topic)
-      expect(pubsub_topic).to receive(:create_subscription).with('broker_my_subscription', {})
+      expect(pubsub_topic).to receive(:create_subscription).with('broker_my_subscription', any_args)
       expect(pubsub).to receive(:get_subscription).with('broker_my_subscription', project: 'test-project-id')
 
       my_topic.create_subscription(:my_subscription)
@@ -39,10 +39,19 @@ RSpec.describe Carto::Common::MessageBroker::Topic do
 
     it 'returns a wrapping subscription object' do
       allow(pubsub).to receive(:get_topic).with('projects/test-project-id/topics/my_topic').and_return(pubsub_topic)
-      expect(pubsub_topic).to receive(:create_subscription).with('broker_my_subscription', {})
+      expect(pubsub_topic).to receive(:create_subscription).with('broker_my_subscription', any_args)
       expect(pubsub).to receive(:get_subscription).with('broker_my_subscription', project: 'test-project-id')
 
       expect(my_topic.create_subscription(:my_subscription)).to be_a(Carto::Common::MessageBroker::Subscription)
+    end
+
+    it 'creates the subscription with an acknowledge deadline of 5 minutes' do
+      allow(pubsub).to receive(:get_topic).with('projects/test-project-id/topics/my_topic').and_return(pubsub_topic)
+      expect(pubsub).to receive(:get_subscription).with('broker_my_subscription', project: 'test-project-id')
+      expect(pubsub_topic).to receive(:create_subscription).with('broker_my_subscription',
+                                                                 hash_including(deadline: 300))
+
+      my_topic.create_subscription(:my_subscription)
     end
   end
 end
