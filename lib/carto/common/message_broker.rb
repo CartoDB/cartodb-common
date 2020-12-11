@@ -154,10 +154,10 @@ module Carto
               received_message.ack!
             end
           else
-            logger.warn(message: 'No callback registered for message',
-                        subscription_name: @subscription_name,
-                        message_type: message_type)
-            received_message.reject!
+            logger.error(message: 'No callback registered for message',
+                         subscription_name: @subscription_name,
+                         message_type: message_type)
+            received_message.ack!
           end
         end
 
