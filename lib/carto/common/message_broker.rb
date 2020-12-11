@@ -98,11 +98,15 @@ module Carto
         end
 
         def create_subscription(subscription, options = {})
-          # TODO: this shall return a wrapping subscription object (?)
-          subscription_name = pubsub_prefixed_name(subscription)
-          @topic.create_subscription(subscription_name, options)
-        rescue Google::Cloud::AlreadyExistsError
-          nil
+          begin
+            subscription_name = pubsub_prefixed_name(subscription)
+            @topic.create_subscription(subscription_name, options)
+          rescue Google::Cloud::AlreadyExistsError
+            nil
+          end
+          Subscription.new(@pubsub,
+                           project_id: @project_id,
+                           subscription_name: subscription_name)
         end
 
         def delete
@@ -177,5 +181,6 @@ module Carto
       end
 
     end
+
   end
 end
