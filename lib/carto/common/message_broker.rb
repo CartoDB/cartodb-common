@@ -17,6 +17,8 @@ module Carto
     class MessageBroker
 
       SUBSCRIPTION_ACK_DEADLINE_SECONDS = 300
+      SUBSCRIPTION_RETRY_POLICY = Google::Cloud::PubSub::RetryPolicy.new(minimum_backoff: 10,
+                                                                         maximum_backoff: 600)
 
       include MessageBrokerPrefix
 
@@ -103,7 +105,8 @@ module Carto
           begin
             subscription_name = pubsub_prefixed_name(subscription)
             @topic.create_subscription(subscription_name,
-                                       deadline: SUBSCRIPTION_ACK_DEADLINE_SECONDS)
+                                       deadline: SUBSCRIPTION_ACK_DEADLINE_SECONDS,
+                                       retry_policy: SUBSCRIPTION_RETRY_POLICY)
           rescue Google::Cloud::AlreadyExistsError
             nil
           end
