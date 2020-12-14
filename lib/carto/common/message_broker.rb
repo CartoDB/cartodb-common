@@ -1,4 +1,5 @@
 require 'google/cloud/pubsub'
+require 'google/cloud/pubsub/retry_policy'
 require 'singleton'
 
 module Carto
