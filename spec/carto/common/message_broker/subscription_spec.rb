@@ -39,7 +39,7 @@ RSpec.describe Carto::Common::MessageBroker::Subscription do
       expect(subscription.main_callback(message)).to eql 'success!'
     end
 
-    it "rejects a message if there's no callback registered for it" do
+    it "acknowledges a message and logs an error if there's no callback registered for it" do
       pubsub = instance_double('PubsubDouble')
       expect(pubsub).to receive(:get_subscription).with('test_subscription', project: 'test-project-id')
 
@@ -51,9 +51,9 @@ RSpec.describe Carto::Common::MessageBroker::Subscription do
       )
 
       message = instance_double('PubsubMessageDouble')
-      expect(logger).to receive(:warn)
+      expect(logger).to receive(:error)
       expect(message).to receive(:attributes).and_return({ 'event' => 'dummy_command' })
-      expect(message).to receive(:reject!)
+      expect(message).to receive(:ack!)
       expect(subscription.main_callback(message)).to be_nil
     end
 

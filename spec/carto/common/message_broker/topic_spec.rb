@@ -25,13 +25,36 @@ RSpec.describe Carto::Common::MessageBroker::Topic do
   end
 
   describe '#create_subscription' do
-    it 'delegates on the pubsub topic instance to create subscriptions' do
+    let(:pubsub) do
       pubsub = instance_double('PubsubDouble')
-      pubsub_topic = instance_double('Google::Cloud::Pubsub::Topic')
       allow(pubsub).to receive(:get_topic).with('projects/test-project-id/topics/my_topic').and_return(pubsub_topic)
-      my_topic = described_class.new(pubsub, project_id: 'test-project-id', topic_name: 'my_topic')
+      allow(pubsub).to receive(:get_subscription).with('broker_my_subscription', project: 'test-project-id')
+      pubsub
+    end
+    let(:pubsub_topic) { instance_double('Google::Cloud::Pubsub::Topic') }
+    let(:my_topic) { described_class.new(pubsub, project_id: 'test-project-id', topic_name: 'my_topic') }
 
-      expect(pubsub_topic).to receive(:create_subscription).with('broker_my_subscription', {})
+    it 'delegates on the pubsub topic instance to create subscriptions' do
+      expect(pubsub_topic).to receive(:create_subscription).with('broker_my_subscription', any_args)
+      my_topic.create_subscription(:my_subscription)
+    end
+
+    it 'returns a wrapping subscription object' do
+      expect(pubsub_topic).to receive(:create_subscription).with('broker_my_subscription', any_args)
+      expect(my_topic.create_subscription(:my_subscription)).to be_a(Carto::Common::MessageBroker::Subscription)
+    end
+
+    it 'creates the subscription with an acknowledge deadline of 5 minutes' do
+      expect(pubsub_topic).to receive(:create_subscription).with('broker_my_subscription',
+                                                                 hash_including(deadline: 300))
+      my_topic.create_subscription(:my_subscription)
+    end
+
+    it 'adds a retry policy of minimum 10 seconds and maximum 10 minutes between retries' do
+      expect(pubsub_topic).to receive(:create_subscription) do |_subscription_name, options|
+        expect(options[:retry_policy].minimum_backoff).to eq(10)
+        expect(options[:retry_policy].maximum_backoff).to eq(600)
+      end
       my_topic.create_subscription(:my_subscription)
     end
   end

@@ -1,4 +1,5 @@
 require 'google/cloud/pubsub'
+require 'google/cloud/pubsub/retry_policy'
 require 'singleton'
 
 module Carto
@@ -15,6 +16,10 @@ module Carto
     end
 
     class MessageBroker
+
+      SUBSCRIPTION_ACK_DEADLINE_SECONDS = 300
+      SUBSCRIPTION_RETRY_POLICY = Google::Cloud::PubSub::RetryPolicy.new(minimum_backoff: 10,
+                                                                         maximum_backoff: 600)
 
       include MessageBrokerPrefix
 
@@ -97,12 +102,18 @@ module Carto
           @topic.publish(payload.to_json, { event: event.to_s })
         end
 
-        def create_subscription(subscription, options = {})
-          # TODO: this shall return a wrapping subscription object (?)
-          subscription_name = pubsub_prefixed_name(subscription)
-          @topic.create_subscription(subscription_name, options)
-        rescue Google::Cloud::AlreadyExistsError
-          nil
+        def create_subscription(subscription)
+          begin
+            subscription_name = pubsub_prefixed_name(subscription)
+            @topic.create_subscription(subscription_name,
+                                       deadline: SUBSCRIPTION_ACK_DEADLINE_SECONDS,
+                                       retry_policy: SUBSCRIPTION_RETRY_POLICY)
+          rescue Google::Cloud::AlreadyExistsError
+            nil
+          end
+          Subscription.new(@pubsub,
+                           project_id: @project_id,
+                           subscription_name: subscription_name)
         end
 
         def delete
@@ -154,10 +165,10 @@ module Carto
               received_message.ack!
             end
           else
-            logger.warn(message: 'No callback registered for message',
-                        subscription_name: @subscription_name,
-                        message_type: message_type)
-            received_message.reject!
+            logger.error(message: 'No callback registered for message',
+                         subscription_name: @subscription_name,
+                         message_type: message_type)
+            received_message.ack!
           end
         end
 
@@ -177,5 +188,6 @@ module Carto
       end
 
     end
+
   end
 end
