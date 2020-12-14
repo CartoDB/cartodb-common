@@ -1,2 +1,10 @@
 inherit_from:
   - https://raw.githubusercontent.com/CartoDB/cartodb/master/.rubocop.yml
+
+####################
+#  Naming
+####################
+
+Naming/FileName:
+  Exclude:
+    - lib/cartodb-common.rb

@@ -27,9 +27,9 @@ RSpec.describe Carto::Common::MessageBroker do
       pubsub = instance_double('Google::Cloud::Pubsub')
       allow(Carto::Common::MessageBroker::Config).to receive(:instance).and_return(config)
       allow(Google::Cloud::Pubsub).to receive(:new).with(project: 'test-project-id').and_return(pubsub)
-      expect(Carto::Common::MessageBroker::Topic).to receive(:new).with(pubsub,
-                                                                        project_id: 'test-project-id',
-                                                                        topic_name: 'broker_dummy_topic')
+      expect(Carto::Common::MessageBroker::Topic).to(
+        receive(:new).with(pubsub, hash_including(project_id: 'test-project-id', topic_name: 'broker_dummy_topic'))
+      )
       message_broker.get_topic(:dummy_topic)
     end
   end

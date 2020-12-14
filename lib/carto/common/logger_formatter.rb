@@ -1,10 +1,14 @@
 require 'active_support'
 require 'active_support/core_ext'
 require 'json'
+require_relative './helpers/environment_helper'
 
 module Carto
   module Common
     class LoggerFormatter < ::ActiveSupport::Logger::Formatter
+
+      include ::EnvironmentHelper
+
       def call(severity, time, _progname, message)
         original_message = message.is_a?(Hash) ? message : { event_message: message }
 
@@ -41,14 +45,6 @@ module Carto
 
         level = severity.to_s.downcase
         level == "warn" ? "warning" : level
-      end
-
-      def development_environment?
-        ENV['RAILS_ENV'].to_s.casecmp('development').zero?
-      end
-
-      def production_environment?
-        ENV['RAILS_ENV'].to_s.casecmp('production').zero?
       end
 
       def replace_key(message_hash, old_key, new_key)

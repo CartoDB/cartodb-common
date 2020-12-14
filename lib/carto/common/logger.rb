@@ -62,6 +62,21 @@ module Carto
         self.formatter = Carto::Common::LoggerFormatter.new
       end
 
+      def debug(params = {})
+        merge_request_id!(params)
+        super(params)
+      end
+
+      def info(params = {})
+        merge_request_id!(params)
+        super(params)
+      end
+
+      def warn(params = {})
+        merge_request_id!(params)
+        super(params)
+      end
+
       def error(params = {})
         rollbar = if params.is_a?(Hash)
                     params.delete(:rollbar) != false
@@ -69,6 +84,7 @@ module Carto
                     true
                   end
 
+        merge_request_id!(params)
         super(params)
         send_exception_to_rollbar(params) if rollbar
       end
@@ -80,11 +96,20 @@ module Carto
                     true
                   end
 
+        merge_request_id!(params)
         super(params)
         send_exception_to_rollbar(params) if rollbar
       end
 
       private
+
+      def merge_request_id!(params)
+        return unless params.is_a?(Hash)
+
+        request_id = Carto::Common::CurrentRequest.request_id
+
+        params.merge!(request_id: request_id) if params[:request_id].blank? && request_id
+      end
 
       def send_exception_to_rollbar(params = {})
         if params.is_a?(Hash)
