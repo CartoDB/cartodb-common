@@ -1,9 +1,9 @@
 PATH
   remote: .
   specs:
-    cartodb-common (0.4.7)
+    cartodb-common (0.4.9)
       argon2 (~> 2)
-      google-cloud-pubsub (~> 1.2)
+      google-cloud-pubsub (~> 1.10)
       rails (>= 4, < 6)
       rollbar
 
