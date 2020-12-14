@@ -27,17 +27,17 @@ RSpec.describe Carto::Common::MessageBroker::Config do
     expect { described_class.instance }.to raise_error "Couldn't find a suitable config module"
   end
 
-  it 'allows to read other central_commands_subscription config setting' do
+  it 'allows to read other central_subscription_name config setting' do
     config_module = Object.const_set(:Cartodb, Module.new)
     config_module.define_singleton_method(:config) do
       {
         message_broker: {
           'project_id' => 'test-project-id',
-          'central_commands_subscription' => 'test-subscription-name'
+          'central_subscription_name' => 'test-subscription-name'
         }
       }
     end
-    expect(described_class.instance.central_commands_subscription)
+    expect(described_class.instance.central_subscription_name)
       .to eql 'test-subscription-name'
   end
 
