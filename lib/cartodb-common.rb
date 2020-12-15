@@ -1,4 +1,6 @@
+require_relative 'carto/common/controller_helper'
 require_relative 'carto/common/countries_helper'
+require_relative 'carto/common/current_request'
 require_relative 'carto/common/encryption_service'
 require_relative 'carto/common/job_logger'
 require_relative 'carto/common/logger'

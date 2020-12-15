@@ -1,10 +1,34 @@
 require 'spec_helper'
+require 'carto/common/current_request'
+require './spec/support/log_device_mock'
 
 RSpec.describe Carto::Common::Logger do
   subject(:logger) { described_class.new }
 
   let(:exception) { StandardError.new('Exception message') }
   let(:message) { 'Message' }
+
+  describe 'common' do
+    it 'propagates the request_id' do
+      Carto::Common::CurrentRequest.request_id = SecureRandom.hex
+
+      output = LogDeviceMock.capture_output(logger) do
+        logger.info(message: message)
+      end
+
+      Carto::Common::CurrentRequest.request_id = nil
+
+      expect(output).to match(/"request_id":"(\d|[a-z]){32}"/)
+    end
+
+    it 'does not override the request_id if already present' do
+      output = LogDeviceMock.capture_output(logger) do
+        logger.info(message: message, request_id: 'original-request-id')
+      end
+
+      expect(output).to match(/"request_id":"original-request-id"/)
+    end
+  end
 
   describe '#error' do
     it 'logs complex messages to Rollbar' do

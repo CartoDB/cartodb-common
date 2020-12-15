@@ -13,14 +13,31 @@ RSpec.describe Carto::Common::MessageBroker::Topic do
   end
 
   describe '#publish' do
-    it 'delegates on the pubsub topic instance to publish events' do
-      pubsub = instance_double('PubsubDouble')
-      pubsub_topic = instance_double('Google::Cloud::Pubsub::Topic')
-      allow(pubsub).to receive(:get_topic).with('projects/test-project-id/topics/my_topic').and_return(pubsub_topic)
-      my_topic = described_class.new(pubsub, project_id: 'test-project-id', topic_name: 'my_topic')
+    let(:request_id) { SecureRandom.hex }
+    let(:pubsub_topic) { instance_double('Google::Cloud::Pubsub::Topic') }
+    let(:pubsub) do
+      double = instance_double('PubsubDouble')
+      allow(double).to receive(:get_topic).with('projects/test-project-id/topics/my_topic').and_return(pubsub_topic)
+      double
+    end
+    let(:my_topic) { described_class.new(pubsub, project_id: 'test-project-id', topic_name: 'my_topic') }
 
+    it 'delegates on the pubsub topic instance to publish events' do
       expect(pubsub_topic).to receive(:publish).with('{}', { event: 'test_event' })
       my_topic.publish(:test_event, {})
+    end
+
+    it 'includes the request_id in the payload if available' do
+      expect(pubsub_topic).to receive(:publish).with("{\"request_id\":\"#{request_id}\"}", { event: 'test_event' })
+
+      Carto::Common::CurrentRequest.with_request_id(request_id) do
+        my_topic.publish(:test_event, {})
+      end
+    end
+
+    it 'does not override payload request_id if already set' do
+      expect(pubsub_topic).to receive(:publish).with("{\"request_id\":\"#{request_id}\"}", { event: 'test_event' })
+      my_topic.publish(:test_event, { request_id: request_id })
     end
   end
 

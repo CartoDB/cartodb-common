@@ -1,6 +1,8 @@
 require 'google/cloud/pubsub'
 require 'google/cloud/pubsub/retry_policy'
 require 'singleton'
+require_relative 'current_request'
+require_relative './helpers/environment_helper'
 
 module Carto
   module Common
@@ -36,7 +38,12 @@ module Carto
 
       def get_topic(topic)
         topic_name = pubsub_prefixed_name(topic)
-        @topics[topic_name] ||= Topic.new(@pubsub, project_id: @project_id, topic_name: topic_name)
+        @topics[topic_name] ||= Topic.new(
+          @pubsub,
+          project_id: @project_id,
+          topic_name: topic_name,
+          logger: logger
+        )
       end
 
       def create_topic(topic)
@@ -88,18 +95,26 @@ module Carto
       class Topic
 
         include MessageBrokerPrefix
+        include ::EnvironmentHelper
 
-        attr_reader :project_id, :topic_name
+        attr_reader :logger, :project_id, :topic_name
 
-        def initialize(pubsub, project_id:, topic_name:)
+        def initialize(pubsub, project_id:, topic_name:, logger: nil)
           @pubsub = pubsub
           @project_id = project_id
           @topic_name = topic_name
           @topic = @pubsub.get_topic("projects/#{@project_id}/topics/#{@topic_name}")
+          @logger = logger || ::Logger.new($stdout)
         end
 
         def publish(event, payload)
-          @topic.publish(payload.to_json, { event: event.to_s })
+          merge_request_id!(payload)
+          result = @topic.publish(
+            payload.to_json,
+            { event: event.to_s }
+          )
+          log_published_event(event, payload)
+          result
         end
 
         def create_subscription(subscription)
@@ -118,6 +133,26 @@ module Carto
 
         def delete
           @topic.delete
+        end
+
+        private
+
+        def log_published_event(event, payload)
+          log_payload = {
+            message: 'Publishing event',
+            event: event,
+            request_id: Carto::Common::CurrentRequest.request_id
+          }
+          log_payload[:payload] = payload if development_environment? || staging_environment?
+          logger.info(log_payload)
+        end
+
+        def merge_request_id!(payload)
+          request_id = Carto::Common::CurrentRequest.request_id
+
+          if payload.is_a?(Hash) && payload[:request_id].blank? && request_id
+            payload.merge!(request_id: Carto::Common::CurrentRequest.request_id)
+          end
         end
 
       end
