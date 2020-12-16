@@ -68,9 +68,7 @@ module Carto
 
         include Singleton
 
-        attr_reader :project_id,
-                    :central_subscription_name
-                    :metrics_subscription_name
+        attr_reader :project_id, :central_subscription_name, :metrics_subscription_name
 
         def initialize
           if self.class.const_defined?(:Cartodb)
