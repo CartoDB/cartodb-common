@@ -68,8 +68,7 @@ module Carto
 
         include Singleton
 
-        attr_reader :project_id,
-                    :central_subscription_name
+        attr_reader :project_id, :central_subscription_name, :metrics_subscription_name
 
         def initialize
           if self.class.const_defined?(:Cartodb)
@@ -83,6 +82,7 @@ module Carto
           config = config_module.config[:message_broker]
           @project_id = config['project_id']
           @central_subscription_name = config['central_subscription_name']
+          @metrics_subscription_name = config['metrics_subscription_name']
           @enabled = config['enabled']
         end
 
