@@ -122,9 +122,9 @@ module Carto
             merge_request_id!(payload)
           end
 
-          @topic.publish do |p|
+          @topic.publish do |t|
             messages.each do |payload|
-              p.publish(
+              t.publish(
                 payload.to_json,
                 { event: event.to_s }
               )
