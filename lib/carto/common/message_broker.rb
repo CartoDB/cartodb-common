@@ -117,6 +117,22 @@ module Carto
           result
         end
 
+        def batch_publish(event, messages)
+          messages.each do |payload|
+            merge_request_id!(payload)
+          end
+
+          @topic.publish do |t|
+            messages.each do |payload|
+              t.publish(
+                payload.to_json,
+                { event: event.to_s }
+              )
+              log_published_event(event, payload)
+            end
+          end
+        end
+
         def create_subscription(subscription)
           begin
             subscription_name = pubsub_prefixed_name(subscription)
