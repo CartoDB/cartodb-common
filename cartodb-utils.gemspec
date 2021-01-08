@@ -21,7 +21,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'rails', '>= 4', '< 6'
   spec.add_dependency 'argon2', '~> 2'
-  spec.add_dependency 'google-cloud-pubsub', '~> 1.10'
+  spec.add_dependency 'google-cloud-pubsub', '~> 2.3.0'
   spec.add_dependency 'rollbar'
 
   spec.add_development_dependency 'bundler', '~> 2'
