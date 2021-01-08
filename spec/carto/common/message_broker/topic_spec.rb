@@ -67,12 +67,24 @@ RSpec.describe Carto::Common::MessageBroker::Topic do
       my_topic.create_subscription(:my_subscription)
     end
 
+    it 'default deadline can be overridden' do
+      expect(pubsub_topic).to receive(:create_subscription).with('broker_my_subscription',
+                                                                 hash_including(deadline: 60))
+      my_topic.create_subscription(:my_subscription, deadline: 60)
+    end
+
     it 'adds a retry policy of minimum 10 seconds and maximum 10 minutes between retries' do
       expect(pubsub_topic).to receive(:create_subscription) do |_subscription_name, options|
         expect(options[:retry_policy].minimum_backoff).to eq(10)
         expect(options[:retry_policy].maximum_backoff).to eq(600)
       end
       my_topic.create_subscription(:my_subscription)
+    end
+
+    it 'may include non-default options such as the push endpoint' do
+      expect(pubsub_topic).to receive(:create_subscription).with('broker_my_subscription',
+                                                                 hash_including(endpoint: 'https://example.com/push'))
+      my_topic.create_subscription(:my_subscription, endpoint: 'https://example.com/push')
     end
   end
 end

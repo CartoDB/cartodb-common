@@ -22,6 +22,10 @@ module Carto
       SUBSCRIPTION_ACK_DEADLINE_SECONDS = 300
       SUBSCRIPTION_RETRY_POLICY = Google::Cloud::PubSub::RetryPolicy.new(minimum_backoff: 10,
                                                                          maximum_backoff: 600)
+      DEFAULT_SUBSCRIPTION_CONFIG = {
+        deadline: SUBSCRIPTION_ACK_DEADLINE_SECONDS,
+        retry_policy: SUBSCRIPTION_RETRY_POLICY
+      }.freeze
 
       include MessageBrokerPrefix
 
@@ -117,12 +121,11 @@ module Carto
           result
         end
 
-        def create_subscription(subscription)
+        def create_subscription(subscription, **kwargs)
           begin
             subscription_name = pubsub_prefixed_name(subscription)
             @topic.create_subscription(subscription_name,
-                                       deadline: SUBSCRIPTION_ACK_DEADLINE_SECONDS,
-                                       retry_policy: SUBSCRIPTION_RETRY_POLICY)
+                                       **DEFAULT_SUBSCRIPTION_CONFIG.merge(kwargs))
           rescue Google::Cloud::AlreadyExistsError
             nil
           end
