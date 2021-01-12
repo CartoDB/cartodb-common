@@ -115,10 +115,8 @@ module Carto
 
         def publish(event, payload)
           merge_request_id!(payload)
-          attributes = {
-            event: event.to_s,
-            token: token
-          }
+          attributes = { event: event.to_s }
+          attributes.merge!(token: token) if token
           result = @topic.publish(
             payload.to_json,
             attributes
