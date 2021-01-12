@@ -102,7 +102,7 @@ module Carto
         include MessageBrokerPrefix
         include ::EnvironmentHelper
 
-        attr_reader :logger, :project_id, :topic_name
+        attr_reader :logger, :project_id, :topic_name, :token
 
         def initialize(pubsub, project_id:, topic_name:, logger: nil, token: nil)
           @pubsub = pubsub
@@ -117,7 +117,7 @@ module Carto
           merge_request_id!(payload)
           attributes = {
             event: event.to_s,
-            token: @token
+            token: token
           }
           result = @topic.publish(
             payload.to_json,

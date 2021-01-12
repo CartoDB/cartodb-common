@@ -33,6 +33,17 @@ RSpec.describe Carto::Common::MessageBroker do
       )
       message_broker.get_topic(:dummy_topic)
     end
+
+    it 'gets its token from configuration' do
+      config = instance_double('Config', project_id: 'test-project-id')
+      allow(config).to receive(:cloud_token).and_return('some-cloud-secret-token')
+      pubsub = instance_double('PubsubDouble')
+      allow(pubsub).to receive(:get_topic)
+      allow(Carto::Common::MessageBroker::Config).to receive(:instance).and_return(config)
+      allow(Google::Cloud::Pubsub).to receive(:new).and_return(pubsub)
+      expect(message_broker.get_topic(:dummy_topic).token).to eql 'some-cloud-secret-token'
+    end
+
   end
 
   describe '#create_topic' do
