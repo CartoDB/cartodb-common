@@ -43,7 +43,7 @@ module Carto
           project_id: @project_id,
           topic_name: topic_name,
           logger: logger,
-          token: @config.cloud_token
+          token: @config.token
         )
       end
 
@@ -72,7 +72,7 @@ module Carto
         attr_reader :project_id,
                     :central_subscription_name,
                     :metrics_subscription_name,
-                    :cloud_token
+                    :token
 
         def initialize
           if self.class.const_defined?(:Cartodb)
@@ -87,7 +87,7 @@ module Carto
           @project_id = config['project_id']
           @central_subscription_name = config['central_subscription_name']
           @metrics_subscription_name = config['metrics_subscription_name']
-          @cloud_token = config['cloud_token']
+          @token = config['token']
           @enabled = config['enabled']
         end
 
