@@ -42,7 +42,8 @@ module Carto
           @pubsub,
           project_id: @project_id,
           topic_name: topic_name,
-          logger: logger
+          logger: logger,
+          token: @config.cloud_token
         )
       end
 
@@ -103,19 +104,24 @@ module Carto
 
         attr_reader :logger, :project_id, :topic_name
 
-        def initialize(pubsub, project_id:, topic_name:, logger: nil)
+        def initialize(pubsub, project_id:, topic_name:, logger: nil, token: nil)
           @pubsub = pubsub
           @project_id = project_id
           @topic_name = topic_name
           @topic = @pubsub.get_topic("projects/#{@project_id}/topics/#{@topic_name}")
           @logger = logger || ::Logger.new($stdout)
+          @token = token
         end
 
         def publish(event, payload)
           merge_request_id!(payload)
+          attributes = {
+            event: event.to_s,
+            token: @token
+          }
           result = @topic.publish(
             payload.to_json,
-            { event: event.to_s }
+            attributes
           )
           log_published_event(event, payload)
           result
