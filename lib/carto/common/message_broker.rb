@@ -167,10 +167,12 @@ module Carto
 
       class Message
         attr_reader :payload,
+                    :request_id,
                     :publisher_validation_token
 
-        def initialize(payload:, publisher_validation_token: nil)
+        def initialize(payload:, request_id: nil, publisher_validation_token: nil)
           @payload = payload
+          @request_id = request_id
           @publisher_validation_token = publisher_validation_token
         end
       end
@@ -204,8 +206,10 @@ module Carto
           if message_callback
             begin
               payload = JSON.parse(received_message.data).with_indifferent_access
+              request_id = payload.delete(:request_id)
               message = Message.new(
                 payload: payload,
+                request_id: request_id,
                 publisher_validation_token: attributes[:publisher_validation_token]
               )
               ret = message_callback.call(message)
