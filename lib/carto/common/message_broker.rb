@@ -116,7 +116,7 @@ module Carto
         def publish(event, payload)
           merge_request_id!(payload)
           attributes = { event: event.to_s }
-          attributes.merge!(publisher_validation_token: publisher_validation_token) if publisher_validation_token
+          attributes[:publisher_validation_token] = publisher_validation_token if publisher_validation_token
           result = @topic.publish(
             payload.to_json,
             attributes
