@@ -29,7 +29,7 @@ RSpec.describe Carto::Common::MessageBroker::Subscription do
         logger: logger
       )
       subscription.register_callback(:dummy_command) do |message|
-        if message.payload == {}
+        if message.payload[:username] == 'coyote'
           'success!'
         else
           'failure!'
@@ -37,7 +37,7 @@ RSpec.describe Carto::Common::MessageBroker::Subscription do
       end
 
       message = instance_double('PubsubMessageDouble')
-      expect(message).to receive(:data).and_return('{}')
+      expect(message).to receive(:data).and_return('{"username":"coyote"}')
       expect(message).to receive(:attributes).and_return({ 'event' => 'dummy_command' })
       expect(message).to receive(:ack!)
       expect(subscription.main_callback(message)).to eql 'success!'
