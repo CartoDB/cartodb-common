@@ -28,8 +28,12 @@ RSpec.describe Carto::Common::MessageBroker::Subscription do
         subscription_name: 'test_subscription',
         logger: logger
       )
-      subscription.register_callback(:dummy_command) do |_payload|
-        'success!'
+      subscription.register_callback(:dummy_command) do |message|
+        if message.payload == {}
+          'success!'
+        else
+          'failure!'
+        end
       end
 
       message = instance_double('PubsubMessageDouble')
@@ -39,7 +43,7 @@ RSpec.describe Carto::Common::MessageBroker::Subscription do
       expect(subscription.main_callback(message)).to eql 'success!'
     end
 
-    it 'dispatches the attributes to the registered callback' do
+    it 'dispatches the publisher_validation_token as part of the message' do
       pubsub = instance_double('PubsubDouble')
       expect(pubsub).to receive(:get_subscription).with('test_subscription', project: 'test-project-id')
 
@@ -49,8 +53,8 @@ RSpec.describe Carto::Common::MessageBroker::Subscription do
         subscription_name: 'test_subscription',
         logger: logger
       )
-      subscription.register_callback(:dummy_command) do |_payload, attributes|
-        if attributes[:event] == 'dummy_command' && attributes[:token] = 'dummy-token'
+      subscription.register_callback(:dummy_command) do |message|
+        if message.publisher_validation_token == 'dummy-token' && message.payload == {}
           'success!'
         else
           'failure!'
@@ -59,7 +63,7 @@ RSpec.describe Carto::Common::MessageBroker::Subscription do
 
       message = instance_double('PubsubMessageDouble')
       expect(message).to receive(:data).and_return('{}')
-      expect(message).to receive(:attributes).and_return({ 'event' => 'dummy_command', 'token' => 'dummy-token' })
+      expect(message).to receive(:attributes).and_return({ 'event' => 'dummy_command', 'publisher_validation_token' => 'dummy-token' })
       expect(message).to receive(:ack!)
       expect(subscription.main_callback(message)).to eql 'success!'
     end

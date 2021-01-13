@@ -165,6 +165,16 @@ module Carto
 
       end
 
+      class Message
+        attr_reader :payload,
+                    :publisher_validation_token
+
+        def initialize(payload:, publisher_validation_token: nil)
+          @payload = payload
+          @publisher_validation_token = publisher_validation_token
+        end
+      end
+
       class Subscription
 
         attr_reader :logger
@@ -194,7 +204,11 @@ module Carto
           if message_callback
             begin
               payload = JSON.parse(received_message.data).with_indifferent_access
-              ret = message_callback.call(payload, attributes)
+              message = Message.new(
+                payload: payload,
+                publisher_validation_token: attributes[:publisher_validation_token]
+              )
+              ret = message_callback.call(message)
               received_message.ack!
               ret
             rescue StandardError => e
