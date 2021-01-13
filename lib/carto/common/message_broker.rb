@@ -188,12 +188,13 @@ module Carto
         end
 
         def main_callback(received_message)
-          message_type = received_message.attributes['event'].to_sym
+          attributes = received_message.attributes.with_indifferent_access
+          message_type = attributes[:event].to_sym
           message_callback = @callbacks[message_type]
           if message_callback
             begin
               payload = JSON.parse(received_message.data).with_indifferent_access
-              ret = message_callback.call(payload)
+              ret = message_callback.call(payload, attributes)
               received_message.ack!
               ret
             rescue StandardError => e
