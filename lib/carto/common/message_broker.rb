@@ -43,7 +43,7 @@ module Carto
           project_id: @project_id,
           topic_name: topic_name,
           logger: logger,
-          token: @config.token
+          publisher_validation_token: @config.publisher_validation_token
         )
       end
 
@@ -72,7 +72,7 @@ module Carto
         attr_reader :project_id,
                     :central_subscription_name,
                     :metrics_subscription_name,
-                    :token
+                    :publisher_validation_token
 
         def initialize
           if self.class.const_defined?(:Cartodb)
@@ -87,7 +87,7 @@ module Carto
           @project_id = config['project_id']
           @central_subscription_name = config['central_subscription_name']
           @metrics_subscription_name = config['metrics_subscription_name']
-          @token = config['token']
+          @publisher_validation_token = config['publisher_validation_token']
           @enabled = config['enabled']
         end
 
@@ -102,21 +102,21 @@ module Carto
         include MessageBrokerPrefix
         include ::EnvironmentHelper
 
-        attr_reader :logger, :project_id, :topic_name, :token
+        attr_reader :logger, :project_id, :topic_name, :publisher_validation_token
 
-        def initialize(pubsub, project_id:, topic_name:, logger: nil, token: nil)
+        def initialize(pubsub, project_id:, topic_name:, logger: nil, publisher_validation_token: nil)
           @pubsub = pubsub
           @project_id = project_id
           @topic_name = topic_name
           @topic = @pubsub.get_topic("projects/#{@project_id}/topics/#{@topic_name}")
           @logger = logger || ::Logger.new($stdout)
-          @token = token
+          @publisher_validation_token = publisher_validation_token
         end
 
         def publish(event, payload)
           merge_request_id!(payload)
           attributes = { event: event.to_s }
-          attributes.merge!(token: token) if token
+          attributes.merge!(publisher_validation_token: publisher_validation_token) if publisher_validation_token
           result = @topic.publish(
             payload.to_json,
             attributes
