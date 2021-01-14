@@ -43,7 +43,6 @@ RSpec.describe Carto::Common::MessageBroker do
       allow(Google::Cloud::Pubsub).to receive(:new).and_return(pubsub)
       expect(message_broker.get_topic(:dummy_topic).publisher_validation_token).to eql 'some-cloud-secret-token'
     end
-
   end
 
   describe '#create_topic' do

@@ -166,6 +166,7 @@ module Carto
       end
 
       class Message
+
         attr_reader :payload,
                     :request_id,
                     :publisher_validation_token
@@ -175,6 +176,7 @@ module Carto
           @request_id = request_id
           @publisher_validation_token = publisher_validation_token
         end
+
       end
 
       class Subscription

@@ -63,7 +63,8 @@ RSpec.describe Carto::Common::MessageBroker::Subscription do
 
       message = instance_double('PubsubMessageDouble')
       expect(message).to receive(:data).and_return('{}')
-      expect(message).to receive(:attributes).and_return({ 'event' => 'dummy_command', 'publisher_validation_token' => 'dummy-token' })
+      expect(message).to receive(:attributes).and_return({ 'event' => 'dummy_command',
+                                                           'publisher_validation_token' => 'dummy-token' })
       expect(message).to receive(:ack!)
       expect(subscription.main_callback(message)).to eql 'success!'
     end
