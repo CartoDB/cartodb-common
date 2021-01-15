@@ -171,8 +171,8 @@ module Carto
                     :request_id,
                     :publisher_validation_token
 
-        def initialize(payload:, request_id: nil, publisher_validation_token: nil)
-          @payload = payload
+        def initialize(payload: {}, request_id: nil, publisher_validation_token: nil)
+          @payload = payload.with_indifferent_access
           @request_id = request_id
           @publisher_validation_token = publisher_validation_token
         end
@@ -202,17 +202,17 @@ module Carto
         end
 
         def main_callback(received_message)
-          attributes = received_message.attributes.with_indifferent_access
-          message_type = attributes[:event].to_sym
+          attributes = received_message.attributes
+          message_type = attributes['event'].to_sym
           message_callback = @callbacks[message_type]
           if message_callback
             begin
-              payload = JSON.parse(received_message.data).with_indifferent_access
+              payload = JSON.parse(received_message.data)
               request_id = payload.delete(:request_id)
               message = Message.new(
                 payload: payload,
                 request_id: request_id,
-                publisher_validation_token: attributes[:publisher_validation_token]
+                publisher_validation_token: attributes['publisher_validation_token']
               )
               ret = message_callback.call(message)
               received_message.ack!
