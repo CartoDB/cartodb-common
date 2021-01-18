@@ -42,7 +42,8 @@ module Carto
           @pubsub,
           project_id: @project_id,
           topic_name: topic_name,
-          logger: logger
+          logger: logger,
+          publisher_validation_token: @config.publisher_validation_token
         )
       end
 
@@ -68,7 +69,10 @@ module Carto
 
         include Singleton
 
-        attr_reader :project_id, :central_subscription_name, :metrics_subscription_name
+        attr_reader :project_id,
+                    :central_subscription_name,
+                    :metrics_subscription_name,
+                    :publisher_validation_token
 
         def initialize
           if self.class.const_defined?(:Cartodb)
@@ -83,6 +87,7 @@ module Carto
           @project_id = config['project_id']
           @central_subscription_name = config['central_subscription_name']
           @metrics_subscription_name = config['metrics_subscription_name']
+          @publisher_validation_token = config['publisher_validation_token']
           @enabled = config['enabled']
         end
 
@@ -97,21 +102,24 @@ module Carto
         include MessageBrokerPrefix
         include ::EnvironmentHelper
 
-        attr_reader :logger, :project_id, :topic_name
+        attr_reader :logger, :project_id, :topic_name, :publisher_validation_token
 
-        def initialize(pubsub, project_id:, topic_name:, logger: nil)
+        def initialize(pubsub, project_id:, topic_name:, logger: nil, publisher_validation_token: nil)
           @pubsub = pubsub
           @project_id = project_id
           @topic_name = topic_name
           @topic = @pubsub.get_topic("projects/#{@project_id}/topics/#{@topic_name}")
           @logger = logger || ::Logger.new($stdout)
+          @publisher_validation_token = publisher_validation_token
         end
 
         def publish(event, payload)
           merge_request_id!(payload)
+          attributes = { event: event.to_s }
+          attributes[:publisher_validation_token] = publisher_validation_token if publisher_validation_token
           result = @topic.publish(
             payload.to_json,
-            { event: event.to_s }
+            attributes
           )
           log_published_event(event, payload)
           result
@@ -157,6 +165,20 @@ module Carto
 
       end
 
+      class Message
+
+        attr_reader :payload,
+                    :request_id,
+                    :publisher_validation_token
+
+        def initialize(payload: {}, request_id: nil, publisher_validation_token: nil)
+          @payload = payload.with_indifferent_access
+          @request_id = request_id
+          @publisher_validation_token = publisher_validation_token
+        end
+
+      end
+
       class Subscription
 
         attr_reader :logger
@@ -180,12 +202,19 @@ module Carto
         end
 
         def main_callback(received_message)
-          message_type = received_message.attributes['event'].to_sym
+          attributes = received_message.attributes
+          message_type = attributes['event'].to_sym
           message_callback = @callbacks[message_type]
           if message_callback
             begin
-              payload = JSON.parse(received_message.data).with_indifferent_access
-              ret = message_callback.call(payload)
+              payload = JSON.parse(received_message.data)
+              request_id = payload.delete(:request_id)
+              message = Message.new(
+                payload: payload,
+                request_id: request_id,
+                publisher_validation_token: attributes['publisher_validation_token']
+              )
+              ret = message_callback.call(message)
               received_message.ack!
               ret
             rescue StandardError => e

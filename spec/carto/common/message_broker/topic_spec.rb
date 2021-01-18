@@ -21,6 +21,12 @@ RSpec.describe Carto::Common::MessageBroker::Topic do
       double
     end
     let(:my_topic) { described_class.new(pubsub, project_id: 'test-project-id', topic_name: 'my_topic') }
+    let(:my_topic_with_token) do
+      described_class.new(pubsub,
+                          project_id: 'test-project-id',
+                          topic_name: 'my_topic',
+                          publisher_validation_token: 'my-secret-token')
+    end
 
     it 'delegates on the pubsub topic instance to publish events' do
       expect(pubsub_topic).to receive(:publish).with('{}', { event: 'test_event' })
@@ -38,6 +44,14 @@ RSpec.describe Carto::Common::MessageBroker::Topic do
     it 'does not override payload request_id if already set' do
       expect(pubsub_topic).to receive(:publish).with("{\"request_id\":\"#{request_id}\"}", { event: 'test_event' })
       my_topic.publish(:test_event, { request_id: request_id })
+    end
+
+    it 'adds the publisher_validation_token to the attributes when passed' do
+      expect(pubsub_topic).to receive(:publish).with("{\"request_id\":\"#{request_id}\"}", {
+                                                       event: 'test_event',
+                                                       publisher_validation_token: 'my-secret-token'
+                                                     })
+      my_topic_with_token.publish(:test_event, { request_id: request_id })
     end
   end
 

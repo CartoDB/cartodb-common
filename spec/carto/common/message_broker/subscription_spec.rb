@@ -28,13 +28,43 @@ RSpec.describe Carto::Common::MessageBroker::Subscription do
         subscription_name: 'test_subscription',
         logger: logger
       )
-      subscription.register_callback(:dummy_command) do |_payload|
-        'success!'
+      subscription.register_callback(:dummy_command) do |message|
+        if message.payload[:username] == 'coyote'
+          'success!'
+        else
+          'failure!'
+        end
+      end
+
+      message = instance_double('PubsubMessageDouble')
+      expect(message).to receive(:data).and_return('{"username":"coyote"}')
+      expect(message).to receive(:attributes).and_return({ 'event' => 'dummy_command' })
+      expect(message).to receive(:ack!)
+      expect(subscription.main_callback(message)).to eql 'success!'
+    end
+
+    it 'dispatches the publisher_validation_token as part of the message' do
+      pubsub = instance_double('PubsubDouble')
+      expect(pubsub).to receive(:get_subscription).with('test_subscription', project: 'test-project-id')
+
+      subscription = described_class.new(
+        pubsub,
+        project_id: 'test-project-id',
+        subscription_name: 'test_subscription',
+        logger: logger
+      )
+      subscription.register_callback(:dummy_command) do |message|
+        if message.publisher_validation_token == 'dummy-token' && message.payload == {}
+          'success!'
+        else
+          'failure!'
+        end
       end
 
       message = instance_double('PubsubMessageDouble')
       expect(message).to receive(:data).and_return('{}')
-      expect(message).to receive(:attributes).and_return({ 'event' => 'dummy_command' })
+      expect(message).to receive(:attributes).and_return({ 'event' => 'dummy_command',
+                                                           'publisher_validation_token' => 'dummy-token' })
       expect(message).to receive(:ack!)
       expect(subscription.main_callback(message)).to eql 'success!'
     end
