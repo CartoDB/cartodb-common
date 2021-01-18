@@ -22,7 +22,7 @@ module Carto
       SUBSCRIPTION_ACK_DEADLINE_SECONDS = 300
       SUBSCRIPTION_RETRY_POLICY = Google::Cloud::PubSub::RetryPolicy.new(minimum_backoff: 10,
                                                                          maximum_backoff: 600)
-      DEAD_LETTER_TOPIC = :undelivered_messages
+      DEAD_LETTER_TOPIC = :dead_letter_queue
       DEAD_LETTER_MAX_DELIVERY_ATTEMPTS = 5
       DEAD_LETTER_POLICY = Google::Cloud::PubSub::DeadLetterPolicy.new(
         dead_letter_topic: DEAD_LETTER_TOPIC,
