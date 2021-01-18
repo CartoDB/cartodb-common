@@ -128,7 +128,7 @@ module Carto
             subscription_name = pubsub_prefixed_name(subscription)
             @topic.create_subscription(subscription_name,
                                        deadline: SUBSCRIPTION_ACK_DEADLINE_SECONDS,
-                                       retry_policy: SUBSCRIPTION_RETRY_POLICY
+                                       retry_policy: SUBSCRIPTION_RETRY_POLICY,
                                        dead_letter_policy: DEAD_LETTER_POLICY)
           rescue Google::Cloud::AlreadyExistsError
             nil
