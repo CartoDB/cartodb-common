@@ -204,7 +204,6 @@ module Carto
                            },
                            subscription_name: @subscription_name,
                            message_type: message_type)
-              received_message.ack!
             end
           else
             logger.error(message: 'No callback registered for message',
