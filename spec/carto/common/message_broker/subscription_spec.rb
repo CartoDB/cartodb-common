@@ -69,6 +69,27 @@ RSpec.describe Carto::Common::MessageBroker::Subscription do
       expect(subscription.main_callback(message)).to eql 'success!'
     end
 
+    it 'dispatches the request_id as an attribute of the message and removes it from the payload, when present' do
+      pubsub = instance_double('PubsubDouble')
+      expect(pubsub).to receive(:get_subscription).with('test_subscription', project: 'test-project-id')
+
+      subscription = described_class.new(
+        pubsub,
+        project_id: 'test-project-id',
+        subscription_name: 'test_subscription',
+        logger: logger
+      )
+      subscription.register_callback(:dummy_command) do |message|
+        message.payload == {} && message.request_id == 'test-request-id' && 'success!'
+      end
+
+      message = instance_double('PubsubMessageDouble')
+      expect(message).to receive(:data).and_return('{ "request_id": "test-request-id" }')
+      expect(message).to receive(:attributes).and_return({ 'event' => 'dummy_command' })
+      expect(message).to receive(:ack!)
+      expect(subscription.main_callback(message)).to eql 'success!'
+    end
+
     it "acknowledges a message and logs an error if there's no callback registered for it" do
       pubsub = instance_double('PubsubDouble')
       expect(pubsub).to receive(:get_subscription).with('test_subscription', project: 'test-project-id')

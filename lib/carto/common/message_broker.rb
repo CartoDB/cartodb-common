@@ -208,7 +208,7 @@ module Carto
           if message_callback
             begin
               payload = JSON.parse(received_message.data)
-              request_id = payload.delete(:request_id)
+              request_id = payload.delete('request_id')
               message = Message.new(
                 payload: payload,
                 request_id: request_id,
