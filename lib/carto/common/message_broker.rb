@@ -19,15 +19,11 @@ module Carto
 
     class MessageBroker
 
-      SUBSCRIPTION_ACK_DEADLINE_SECONDS = 300
-      SUBSCRIPTION_RETRY_POLICY = Google::Cloud::PubSub::RetryPolicy.new(minimum_backoff: 10,
-                                                                         maximum_backoff: 600)
-      DEAD_LETTER_TOPIC = :dead_letter_queue
-      DEAD_LETTER_MAX_DELIVERY_ATTEMPTS = 5
-      DEAD_LETTER_POLICY = Google::Cloud::PubSub::V1::DeadLetterPolicy.new(
-        dead_letter_topic: DEAD_LETTER_TOPIC,
-        max_delivery_attempts: DEAD_LETTER_MAX_DELIVERY_ATTEMPTS
-      )
+      DEFAULT_SUBSCRIPTION_ACK_DEADLINE_SECONDS = 300
+      DEFAULT_SUBSCRIPTION_RETRY_POLICY = Google::Cloud::PubSub::RetryPolicy.new(minimum_backoff: 10,
+                                                                                 maximum_backoff: 600)
+      DEFAULT_DEAD_LETTER_TOPIC = :dead_letter_queue
+      DEFAULT_DEAD_LETTER_MAX_DELIVERY_ATTEMPTS = 5
 
       include MessageBrokerPrefix
 
@@ -131,13 +127,16 @@ module Carto
           result
         end
 
-        def create_subscription(subscription)
+        def create_subscription(subscription_name, options = {})
           begin
-            subscription_name = pubsub_prefixed_name(subscription)
-            @topic.create_subscription(subscription_name,
-                                       deadline: SUBSCRIPTION_ACK_DEADLINE_SECONDS,
-                                       retry_policy: SUBSCRIPTION_RETRY_POLICY,
-                                       dead_letter_policy: DEAD_LETTER_POLICY)
+            subscription_name = pubsub_prefixed_name(subscription_name)
+
+            @topic.create_subscription(
+              subscription_name,
+              deadline: options[:subscription_ack_deadline_seconds] || DEFAULT_SUBSCRIPTION_ACK_DEADLINE_SECONDS,
+              retry_policy: options[:subscription_retry_policy] || DEFAULT_SUBSCRIPTION_RETRY_POLICY,
+              dead_letter_policy: build_dead_letter_policy(options)
+            )
           rescue Google::Cloud::AlreadyExistsError
             nil
           end
@@ -168,6 +167,17 @@ module Carto
           if payload.is_a?(Hash) && payload[:request_id].blank? && request_id
             payload.merge!(request_id: Carto::Common::CurrentRequest.request_id)
           end
+        end
+
+        def build_dead_letter_policy(params = {})
+          return params[:dead_letter_policy] if params[:dead_letter_policy]
+          return if params[:dead_letter_topic].blank? && params[:dead_letter_max_delivery_attempts].blank?
+
+          Google::Cloud::PubSub::V1::DeadLetterPolicy.new(
+            dead_letter_topic: params[:dead_letter_topic] || DEFAULT_DEAD_LETTER_TOPIC,
+            max_delivery_attempts: params[:dead_letter_max_delivery_attempts] ||
+                                   DEFAULT_DEAD_LETTER_MAX_DELIVERY_ATTEMPTS
+          )
         end
 
       end
