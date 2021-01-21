@@ -1,7 +1,6 @@
 require 'google/cloud/pubsub'
 require 'google/cloud/pubsub/retry_policy'
 require 'singleton'
-require 'google-cloud-pubsub-v1'
 require_relative 'current_request'
 require_relative './helpers/environment_helper'
 
@@ -27,7 +26,7 @@ module Carto
       DEAD_LETTER_MAX_DELIVERY_ATTEMPTS = 5
       DEAD_LETTER_POLICY = Google::Cloud::PubSub::V1::DeadLetterPolicy.new(
         dead_letter_topic: DEAD_LETTER_TOPIC,
-        dead_letter_max_delivery_attempts: DEAD_LETTER_MAX_DELIVERY_ATTEMPTS
+        max_delivery_attempts: DEAD_LETTER_MAX_DELIVERY_ATTEMPTS
       )
 
       include MessageBrokerPrefix

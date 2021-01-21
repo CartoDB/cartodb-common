@@ -4,6 +4,7 @@ PATH
     cartodb-common (1.0.1)
       argon2 (~> 2)
       google-cloud-pubsub (~> 2.3)
+      google-cloud-pubsub-v1
       rails (>= 4, < 6)
       rollbar
 
