@@ -52,7 +52,8 @@ module Carto
       def create_topic(topic)
         topic_name = pubsub_prefixed_name(topic)
         begin
-          @pubsub.create_topic(topic_name)
+          new_topic = @pubsub.create_topic(topic_name)
+          Rails.logger.info(message: 'Topic created', topic_name: new_topic.name)
         rescue Google::Cloud::AlreadyExistsError
           nil
         end
@@ -132,13 +133,14 @@ module Carto
                                 retry_policy: DEFAULT_SUBSCRIPTION_RETRY_POLICY)
           begin
             subscription_name = pubsub_prefixed_name(subscription_name)
-            @topic.create_subscription(
+            subscription = @topic.create_subscription(
               subscription_name,
               deadline: ack_deadline_seconds,
               retry_policy: retry_policy,
               dead_letter_topic: dead_letter_topic_name ? get_topic(pubsub_prefixed_name(dead_letter_topic_name)) : nil,
               dead_letter_max_delivery_attempts: dead_letter_max_delivery_attempts
             )
+            Rails.logger.info(message: 'Subscription created', subscription_name: subscription.name)
           rescue Google::Cloud::AlreadyExistsError
             nil
           end
