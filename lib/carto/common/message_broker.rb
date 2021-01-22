@@ -242,6 +242,8 @@ module Carto
                            },
                            subscription_name: @subscription_name,
                            message_type: message_type)
+              # Make the message available for redelivery
+              received_message.nack!
             end
           else
             logger.error(message: 'No callback registered for message',
