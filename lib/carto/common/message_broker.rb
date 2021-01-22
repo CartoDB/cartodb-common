@@ -22,7 +22,7 @@ module Carto
       DEFAULT_SUBSCRIPTION_ACK_DEADLINE_SECONDS = 300
       DEFAULT_SUBSCRIPTION_RETRY_POLICY = Google::Cloud::PubSub::RetryPolicy.new(minimum_backoff: 10,
                                                                                  maximum_backoff: 600)
-      DEFAULT_DEAD_LETTER_TOPIC = :dead_letter_queue
+      DEFAULT_DEAD_LETTER_TOPIC_NAME = :dead_letter_queue
       DEFAULT_DEAD_LETTER_MAX_DELIVERY_ATTEMPTS = 5
 
       include MessageBrokerPrefix
@@ -110,7 +110,7 @@ module Carto
           @pubsub = pubsub
           @project_id = project_id
           @topic_name = topic_name
-          @topic = @pubsub.get_topic("projects/#{@project_id}/topics/#{@topic_name}")
+          @topic = get_topic(@topic_name)
           @logger = logger || ::Logger.new($stdout)
           @publisher_validation_token = publisher_validation_token
         end
@@ -128,7 +128,7 @@ module Carto
         end
 
         def create_subscription(subscription_name, ack_deadline_seconds: DEFAULT_SUBSCRIPTION_ACK_DEADLINE_SECONDS,
-                                dead_letter_topic: nil, dead_letter_max_delivery_attempts: nil,
+                                dead_letter_topic_name: nil, dead_letter_max_delivery_attempts: nil,
                                 retry_policy: DEFAULT_SUBSCRIPTION_RETRY_POLICY)
           begin
             subscription_name = pubsub_prefixed_name(subscription_name)
@@ -136,7 +136,7 @@ module Carto
               subscription_name,
               deadline: ack_deadline_seconds,
               retry_policy: retry_policy,
-              dead_letter_topic: dead_letter_topic,
+              dead_letter_topic: dead_letter_topic_name ? get_topic(pubsub_prefixed_name(dead_letter_topic_name)) : nil,
               dead_letter_max_delivery_attempts: dead_letter_max_delivery_attempts
             )
           rescue Google::Cloud::AlreadyExistsError
@@ -171,6 +171,10 @@ module Carto
           end
         end
 
+        def get_topic(topic_name)
+          @pubsub.get_topic("projects/#{@project_id}/topics/#{topic_name}")
+        end
+
       end
 
       class Message
@@ -188,6 +192,8 @@ module Carto
       end
 
       class Subscription
+
+        class NotFound < StandardError; end
 
         attr_reader :logger
 
@@ -246,6 +252,9 @@ module Carto
         def start(options = {})
           logger.info(message: 'Starting message processing in subscriber',
                       subscription_name: @subscription_name)
+
+          raise NotFound, "Subscription #{@subscription_name} does not exist" if @subscription.blank?
+
           @subscriber = @subscription.listen(options, &method(:main_callback))
           @subscriber.start
         end
