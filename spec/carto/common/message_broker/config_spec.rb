@@ -1,6 +1,8 @@
 require 'carto/common/message_broker'
 
 RSpec.describe Carto::Common::MessageBroker::Config do
+  let(:central_config_module) { Object.const_set(:CartodbCentral, Module.new) }
+
   before do
     described_class.instance_variable_set(:@singleton__instance__, nil)
     Object.send(:remove_const, :Cartodb) if Object.constants.include?(:Cartodb)
@@ -16,8 +18,7 @@ RSpec.describe Carto::Common::MessageBroker::Config do
   end
 
   it 'uses CartodbCentral config module if it exists' do
-    config_module = Object.const_set(:CartodbCentral, Module.new)
-    config_module.define_singleton_method(:config) do
+    central_config_module.define_singleton_method(:config) do
       { message_broker: { 'project_id' => 'test-project-id' } }
     end
     expect(described_class.instance.project_id).to eql 'test-project-id'
@@ -43,27 +44,43 @@ RSpec.describe Carto::Common::MessageBroker::Config do
 
   describe '#enabled?' do
     it 'returns false if not defined' do
-      config_module = Object.const_set(:CartodbCentral, Module.new)
-      config_module.define_singleton_method(:config) do
+      central_config_module.define_singleton_method(:config) do
         { message_broker: {} }
       end
       expect(described_class.instance.enabled?).to be false
     end
 
     it 'returns true when set to true' do
-      config_module = Object.const_set(:CartodbCentral, Module.new)
-      config_module.define_singleton_method(:config) do
+      central_config_module.define_singleton_method(:config) do
         { message_broker: { 'enabled' => true } }
       end
       expect(described_class.instance.enabled?).to be true
     end
 
     it 'returns false when set to false' do
-      config_module = Object.const_set(:CartodbCentral, Module.new)
-      config_module.define_singleton_method(:config) do
+      central_config_module.define_singleton_method(:config) do
         { message_broker: { 'enabled' => false } }
       end
       expect(described_class.instance.enabled?).to be false
+    end
+  end
+
+  describe '#pubsub_project_service_account_name' do
+    subject(:service_account_name) { described_class.instance.pubsub_project_service_account_name }
+
+    let(:project_number) { 123_456_789 }
+
+    before do
+      central_config_module.define_singleton_method(:config) { { message_broker: { 'enabled' => true } } }
+      pubsub_project = instance_double('Google::Cloud::ResourceManager::Project')
+      allow(pubsub_project).to receive(:project_number).and_return(project_number)
+      allow(described_class.instance).to receive(:pubsub_project).and_return(pubsub_project)
+    end
+
+    it 'returns the Service Account name of the current Pub/Sub project' do
+      expect(service_account_name).to(
+        eq("serviceAccount:service-#{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com")
+      )
     end
   end
 end
