@@ -226,7 +226,8 @@ module Carto
                            },
                            subscription_name: @subscription_name,
                            message_type: message_type)
-              received_message.ack!
+              # Make the message available for redelivery
+              received_message.reject!
             end
           else
             logger.error(message: 'No callback registered for message',
