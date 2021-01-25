@@ -1,5 +1,6 @@
 require 'google/cloud/pubsub'
 require 'google/cloud/pubsub/retry_policy'
+require 'google/cloud/resource_manager'
 require 'singleton'
 require_relative 'current_request'
 require_relative './helpers/environment_helper'
@@ -77,6 +78,8 @@ module Carto
                     :metrics_subscription_name,
                     :publisher_validation_token
 
+        delegate :project_number, to: :pubsub_project
+
         def initialize
           if self.class.const_defined?(:Cartodb)
             config_module = Cartodb
@@ -96,6 +99,16 @@ module Carto
 
         def enabled?
           @enabled || false
+        end
+
+        def pubsub_project_service_account_name
+          "serviceAccount:service-#{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com"
+        end
+
+        private
+
+        def pubsub_project
+          @pubsub_project ||= Google::Cloud::ResourceManager.new.project(project_id)
         end
 
       end
