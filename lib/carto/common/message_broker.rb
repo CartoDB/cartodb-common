@@ -269,6 +269,10 @@ module Carto
           @subscriber.stop!
         end
 
+        def name
+          @subscription&.name
+        end
+
       end
 
     end
