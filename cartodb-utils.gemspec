@@ -19,9 +19,10 @@ Gem::Specification.new do |spec|
     `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^spec/}) }
   end
 
-  spec.add_dependency 'rails', '>= 4', '< 6'
   spec.add_dependency 'argon2', '~> 2'
   spec.add_dependency 'google-cloud-pubsub', '~> 2.3'
+  spec.add_dependency 'google-cloud-resource_manager'
+  spec.add_dependency 'rails', '>= 4', '< 6'
   spec.add_dependency 'rollbar'
 
   spec.add_development_dependency 'bundler', '~> 2'

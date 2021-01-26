@@ -60,24 +60,30 @@ RSpec.describe Carto::Common::MessageBroker::Topic do
       pubsub = instance_double('PubsubDouble')
       allow(pubsub).to receive(:get_topic).with('projects/test-project-id/topics/my_topic').and_return(pubsub_topic)
       allow(pubsub).to receive(:get_subscription).with('broker_my_subscription', project: 'test-project-id')
+      allow(pubsub_subscription).to receive(:name)
       pubsub
     end
     let(:pubsub_topic) { instance_double('Google::Cloud::Pubsub::Topic') }
+    let(:pubsub_subscription) { instance_double('Google::Cloud::Pubsub::Subscription') }
     let(:my_topic) { described_class.new(pubsub, project_id: 'test-project-id', topic_name: 'my_topic') }
 
     it 'delegates on the pubsub topic instance to create subscriptions' do
       expect(pubsub_topic).to receive(:create_subscription).with('broker_my_subscription', any_args)
+                                                           .and_return(pubsub_subscription)
       my_topic.create_subscription(:my_subscription)
     end
 
     it 'returns a wrapping subscription object' do
       expect(pubsub_topic).to receive(:create_subscription).with('broker_my_subscription', any_args)
+                                                           .and_return(pubsub_subscription)
       expect(my_topic.create_subscription(:my_subscription)).to be_a(Carto::Common::MessageBroker::Subscription)
     end
 
     it 'creates the subscription with an acknowledge deadline of 5 minutes' do
-      expect(pubsub_topic).to receive(:create_subscription).with('broker_my_subscription',
-                                                                 hash_including(deadline: 300))
+      expect(pubsub_topic).to(
+        receive(:create_subscription).with('broker_my_subscription', hash_including(deadline: 300))
+                                     .and_return(pubsub_subscription)
+      )
       my_topic.create_subscription(:my_subscription)
     end
 
@@ -85,8 +91,30 @@ RSpec.describe Carto::Common::MessageBroker::Topic do
       expect(pubsub_topic).to receive(:create_subscription) do |_subscription_name, options|
         expect(options[:retry_policy].minimum_backoff).to eq(10)
         expect(options[:retry_policy].maximum_backoff).to eq(600)
-      end
+      end.and_return(pubsub_subscription)
       my_topic.create_subscription(:my_subscription)
+    end
+
+    context 'when dead letter configuration is specified' do
+      before do
+        allow(pubsub).to receive(:get_topic).with('projects/test-project-id/topics/broker_my-dead-letter-topic')
+                                            .and_return(pubsub_topic)
+      end
+
+      it 'propagates the settings to the inner Pub/Sub client' do
+        expect(pubsub_topic).to(
+          receive(:create_subscription).with(
+            'broker_my_subscription',
+            hash_including(dead_letter_topic: anything, dead_letter_max_delivery_attempts: 100)
+          )
+        ).and_return(pubsub_subscription)
+
+        my_topic.create_subscription(
+          :my_subscription,
+          dead_letter_topic_name: 'my-dead-letter-topic',
+          dead_letter_max_delivery_attempts: 100
+        )
+      end
     end
   end
 end

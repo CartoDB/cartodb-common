@@ -46,15 +46,19 @@ RSpec.describe Carto::Common::MessageBroker do
   end
 
   describe '#create_topic' do
-    it 'creates and returns a topic' do
-      config = instance_double('Config', project_id: 'test-project-id')
-      allow(config).to receive(:publisher_validation_token).and_return('some-cloud-secret-token')
-      pubsub = instance_double('PubsubDouble')
-      topic = instance_double('Topic')
+    let(:config) { instance_double('Config', project_id: 'test-project-id') }
+    let(:pubsub) { instance_double('PubsubDouble') }
+    let(:topic) { instance_double('Topic') }
+    let(:pubsub_topic) { instance_double('Google::Cloud::Pubsub::Topic') }
 
+    before { allow(pubsub_topic).to receive(:name) }
+
+    it 'creates and returns a topic' do
+      allow(config).to receive(:publisher_validation_token).and_return('some-cloud-secret-token')
       allow(Carto::Common::MessageBroker::Config).to receive(:instance).and_return(config)
       allow(Google::Cloud::Pubsub).to receive(:new).with(project: 'test-project-id').and_return(pubsub)
-      expect(pubsub).to receive(:create_topic).with('broker_dummy_topic')
+
+      expect(pubsub).to receive(:create_topic).with('broker_dummy_topic').and_return(pubsub_topic)
       expect(Carto::Common::MessageBroker::Topic).to receive(:new).and_return(topic)
       expect(message_broker.create_topic(:dummy_topic)).to eql topic
     end
