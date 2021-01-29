@@ -6,6 +6,7 @@ RSpec.describe Carto::Common::LoggerFormatter do
   let(:severity) { 'INFO' }
   let(:time) { Time.now }
   let(:progname) {}
+  let(:parsed_output) { JSON.parse(output) }
 
   context 'message format' do
     it 'accepts blank message' do
@@ -85,7 +86,6 @@ RSpec.describe Carto::Common::LoggerFormatter do
   context 'when serializing exceptions' do
     let(:exception) { StandardError.new('Error body') }
     let(:output) { subject.call(severity, time, progname, { exception: exception }) }
-    let(:parsed_output) { JSON.parse(output) }
 
     it 'outputs the exception class' do
       expect(parsed_output['exception']['class']).to eq('StandardError')
@@ -107,7 +107,6 @@ RSpec.describe Carto::Common::LoggerFormatter do
   context 'when serializing ::User objects' do
     let(:user) { User.create(username: 'foobar') }
     let(:output) { subject.call(severity, time, progname, { some_key: user }) }
-    let(:parsed_output) { JSON.parse(output) }
 
     it 'outputs the username' do
       expect(parsed_output['some_key']).to eq('foobar')
@@ -117,7 +116,6 @@ RSpec.describe Carto::Common::LoggerFormatter do
   context 'when serializing ::Carto::User objects' do
     let(:user) { Carto::User.create(username: 'foobar') }
     let(:output) { subject.call(severity, time, progname, { some_key: user }) }
-    let(:parsed_output) { JSON.parse(output) }
 
     it 'outputs the username' do
       expect(parsed_output['some_key']).to eq('foobar')
@@ -127,7 +125,6 @@ RSpec.describe Carto::Common::LoggerFormatter do
   context 'when serializing ::Organization objects' do
     let(:organization) { Organization.create(name: 'foobar') }
     let(:output) { subject.call(severity, time, progname, { some_key: organization }) }
-    let(:parsed_output) { JSON.parse(output) }
 
     it 'outputs the organization name' do
       expect(parsed_output['some_key']).to eq('foobar')
@@ -137,7 +134,6 @@ RSpec.describe Carto::Common::LoggerFormatter do
   context 'when serializing ::Carto::Organization objects' do
     let(:organization) { Carto::Organization.create(name: 'foobar') }
     let(:output) { subject.call(severity, time, progname, { some_key: organization }) }
-    let(:parsed_output) { JSON.parse(output) }
 
     it 'outputs the organization name' do
       expect(parsed_output['some_key']).to eq('foobar')
