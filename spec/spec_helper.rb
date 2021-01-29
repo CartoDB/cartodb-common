@@ -1,8 +1,20 @@
+require 'byebug'
 require "bundler/setup"
 require "carto/common/encryption_service"
 require 'carto/common/logger'
 require "carto/common/logger_formatter"
 require 'google/cloud/pubsub'
+require './spec/support/application_record_mock'
+
+# Mocks CartoDB & Central models as they don't exist in the context of this gem
+class User < ApplicationRecordMock; end
+class Organization < ApplicationRecordMock; end
+module Carto
+
+  class User < ApplicationRecordMock; end
+  class Organization < ApplicationRecordMock; end
+
+end
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure

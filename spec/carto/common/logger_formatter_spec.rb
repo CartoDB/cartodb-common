@@ -104,6 +104,46 @@ RSpec.describe Carto::Common::LoggerFormatter do
     end
   end
 
+  context 'when serializing ::User objects' do
+    let(:user) { User.create(username: 'foobar') }
+    let(:output) { subject.call(severity, time, progname, { some_key: user }) }
+    let(:parsed_output) { JSON.parse(output) }
+
+    it 'outputs the username' do
+      expect(parsed_output['some_key']).to eq('foobar')
+    end
+  end
+
+  context 'when serializing ::Carto::User objects' do
+    let(:user) { Carto::User.create(username: 'foobar') }
+    let(:output) { subject.call(severity, time, progname, { some_key: user }) }
+    let(:parsed_output) { JSON.parse(output) }
+
+    it 'outputs the username' do
+      expect(parsed_output['some_key']).to eq('foobar')
+    end
+  end
+
+  context 'when serializing ::Organization objects' do
+    let(:organization) { Organization.create(name: 'foobar') }
+    let(:output) { subject.call(severity, time, progname, { some_key: organization }) }
+    let(:parsed_output) { JSON.parse(output) }
+
+    it 'outputs the organization name' do
+      expect(parsed_output['some_key']).to eq('foobar')
+    end
+  end
+
+  context 'when serializing ::Carto::Organization objects' do
+    let(:organization) { Carto::Organization.create(name: 'foobar') }
+    let(:output) { subject.call(severity, time, progname, { some_key: organization }) }
+    let(:parsed_output) { JSON.parse(output) }
+
+    it 'outputs the organization name' do
+      expect(parsed_output['some_key']).to eq('foobar')
+    end
+  end
+
   it 'renames current_user to cdb-user' do
     output = subject.call(severity, time, progname, { message: 'Something!', current_user: 'peter' })
     parsed_output = JSON.parse(output)
