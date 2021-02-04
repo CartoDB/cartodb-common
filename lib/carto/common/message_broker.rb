@@ -210,6 +210,8 @@ module Carto
 
         class NotFound < StandardError; end
 
+        include ::EnvironmentHelper
+
         attr_reader :logger
 
         def initialize(pubsub, project_id:, subscription_name:, logger: nil)
@@ -248,11 +250,7 @@ module Carto
               ret
             rescue StandardError => e
               logger.error(message: 'Error in message processing callback',
-                           exception: {
-                             class: e.class.name,
-                             message: e.message,
-                             backtrace_hint: e.backtrace&.take(5)
-                           },
+                           exception: serialize_exception(e),
                            subscription_name: @subscription_name,
                            message_type: message_type)
               # Make the message available for redelivery
@@ -284,6 +282,21 @@ module Carto
 
         def name
           @subscription&.name
+        end
+
+        private
+
+        def serialize_exception(exception)
+          backtrace_hint = if development_environment? || staging_environment?
+                             exception.backtrace
+                           else
+                             exception.backtrace&.take(10)
+                           end
+          {
+            class: exception.class.name,
+            message: exception.message,
+            backtrace_hint: backtrace_hint
+          }
         end
 
       end
