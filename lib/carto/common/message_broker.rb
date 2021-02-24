@@ -234,10 +234,11 @@ module Carto
           attributes = received_message.attributes
           message_type = attributes['event'].to_sym
           message_callback = @callbacks[message_type]
+          payload = JSON.parse(received_message.data)
+          request_id = payload.delete('request_id')
+
           if message_callback
             begin
-              payload = JSON.parse(received_message.data)
-              request_id = payload.delete('request_id')
               message = Message.new(
                 payload: payload,
                 request_id: request_id,
@@ -257,7 +258,8 @@ module Carto
           else
             logger.error(message: 'No callback registered for message',
                          subscription_name: @subscription_name,
-                         message_type: message_type)
+                         message_type: message_type,
+                         request_id: request_id)
             received_message.ack!
           end
         end
