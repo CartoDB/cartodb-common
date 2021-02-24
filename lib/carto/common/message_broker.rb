@@ -248,11 +248,7 @@ module Carto
               ret
             rescue StandardError => e
               logger.error(message: 'Error in message processing callback',
-                           exception: {
-                             class: e.class.name,
-                             message: e.message,
-                             backtrace_hint: e.backtrace&.take(5)
-                           },
+                           exception: e,
                            subscription_name: @subscription_name,
                            message_type: message_type)
               # Make the message available for redelivery
