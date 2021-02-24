@@ -269,6 +269,7 @@ module Carto
           raise NotFound, "Subscription #{@subscription_name} does not exist" if @subscription.blank?
 
           @subscriber = @subscription.listen(options, &method(:main_callback))
+          @subscriber.on_error { |error| logger.error(error) }
           @subscriber.start
         end
 
