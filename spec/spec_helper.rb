@@ -59,4 +59,24 @@ class PubsubMessageDouble < Google::Cloud::Pubsub::Message
   end
 
 end
+
+class PubSubSubscriberDouble < Google::Cloud::PubSub::Subscriber
+
+  def initialize; end
+
+  def start; end
+
+  def on_error; end
+
+end
+
+class PubSubSubscriptionDouble < Google::Cloud::PubSub::Subscription
+
+  def initialize; end
+
+  def listen(*)
+    PubSubSubscriberDouble.new
+  end
+
+end
 # rubocop:enable Lint/UselessMethodDefinition
