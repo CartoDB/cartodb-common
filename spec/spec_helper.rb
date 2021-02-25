@@ -1,8 +1,20 @@
+require 'byebug'
 require "bundler/setup"
 require "carto/common/encryption_service"
 require 'carto/common/logger'
 require "carto/common/logger_formatter"
 require 'google/cloud/pubsub'
+require './spec/support/application_record_mock'
+
+# Mocks CartoDB & Central models as they don't exist in the context of this gem
+class User < ApplicationRecordMock; end
+class Organization < ApplicationRecordMock; end
+module Carto
+
+  class User < ApplicationRecordMock; end
+  class Organization < ApplicationRecordMock; end
+
+end
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
@@ -44,6 +56,26 @@ class PubsubMessageDouble < Google::Cloud::Pubsub::Message
 
   def reject!(*)
     super
+  end
+
+end
+
+class PubSubSubscriberDouble < Google::Cloud::PubSub::Subscriber
+
+  def initialize; end
+
+  def start; end
+
+  def on_error; end
+
+end
+
+class PubSubSubscriptionDouble < Google::Cloud::PubSub::Subscription
+
+  def initialize; end
+
+  def listen(*)
+    PubSubSubscriberDouble.new
   end
 
 end

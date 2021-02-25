@@ -32,6 +32,8 @@ module Carto
           message_hash[:message] = exception.message if message_hash[:message].blank?
         end
 
+        serialize_message_hash_values!(message_hash)
+
         replace_key(message_hash, :current_user, :'cdb-user')
         replace_key(message_hash, :message, :event_message)
 
@@ -39,6 +41,16 @@ module Carto
       end
 
       private
+
+      def serialize_message_hash_values!(message_hash)
+        message_hash.each do |key, value|
+          if user?(value)
+            message_hash[key] = value.username
+          elsif organization?(value)
+            message_hash[key] = value.name
+          end
+        end
+      end
 
       def levelname(severity)
         return 'info' if severity.blank?
@@ -63,6 +75,17 @@ module Carto
           end
         end
       end
+
+      def user?(object)
+        (defined?(::User) && object.is_a?(::User)) ||
+          (defined?(::Carto::User) && object.is_a?(::Carto::User))
+      end
+
+      def organization?(object)
+        (defined?(::Organization) && object.is_a?(::Organization)) ||
+          (defined?(::Carto::Organization) && object.is_a?(::Carto::Organization))
+      end
+
     end
   end
 end

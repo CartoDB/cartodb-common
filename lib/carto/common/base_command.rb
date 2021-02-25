@@ -24,7 +24,13 @@ module Carto
             before_run_hooks
             run_command
           rescue StandardError => e
-            logger.error(log_context.merge(message: 'Command failed', exception: e))
+            logger.error(
+              log_context.merge(
+                message: 'Command failed',
+                exception: e,
+                rollbar: false # Don't report to Rollbar twice, as we're re-raising the exception afterwards
+              )
+            )
             raise e
           ensure
             after_run_hooks

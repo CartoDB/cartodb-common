@@ -234,10 +234,11 @@ module Carto
           attributes = received_message.attributes
           message_type = attributes['event'].to_sym
           message_callback = @callbacks[message_type]
+          payload = JSON.parse(received_message.data)
+          request_id = payload.delete('request_id')
+
           if message_callback
             begin
-              payload = JSON.parse(received_message.data)
-              request_id = payload.delete('request_id')
               message = Message.new(
                 payload: payload,
                 request_id: request_id,
@@ -248,11 +249,7 @@ module Carto
               ret
             rescue StandardError => e
               logger.error(message: 'Error in message processing callback',
-                           exception: {
-                             class: e.class.name,
-                             message: e.message,
-                             backtrace_hint: e.backtrace&.take(5)
-                           },
+                           exception: e,
                            subscription_name: @subscription_name,
                            message_type: message_type)
               # Make the message available for redelivery
@@ -261,7 +258,8 @@ module Carto
           else
             logger.error(message: 'No callback registered for message',
                          subscription_name: @subscription_name,
-                         message_type: message_type)
+                         message_type: message_type,
+                         request_id: request_id)
             received_message.ack!
           end
         end
@@ -273,6 +271,7 @@ module Carto
           raise NotFound, "Subscription #{@subscription_name} does not exist" if @subscription.blank?
 
           @subscriber = @subscription.listen(options, &method(:main_callback))
+          @subscriber.on_error { |error| logger.error(error) }
           @subscriber.start
         end
 
