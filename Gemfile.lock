@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    cartodb-common (1.1.1)
+    cartodb-common (1.1.2)
       argon2 (~> 2)
       google-cloud-pubsub (~> 2.3)
       google-cloud-resource_manager
@@ -149,13 +149,11 @@ GEM
     memoist (0.16.2)
     method_source (1.0.0)
     mini_mime (1.1.0)
-    mini_portile2 (2.5.0)
     minitest (5.14.4)
     multi_json (1.15.0)
     multipart-post (2.1.1)
     nio4r (2.5.7)
-    nokogiri (1.11.3)
-      mini_portile2 (~> 2.5.0)
+    nokogiri (1.11.3-x86_64-darwin)
       racc (~> 1.4)
     os (1.1.1)
     parallel (1.20.1)
