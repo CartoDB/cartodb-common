@@ -166,6 +166,10 @@ module Carto
           @topic.delete
         end
 
+        def exists?
+          @topic.present?
+        end
+
         private
 
         def log_published_event(event, payload)
@@ -283,6 +287,10 @@ module Carto
 
         def name
           @subscription&.name
+        end
+
+        def exists?
+          @subscription.present?
         end
 
       end
