@@ -1,7 +1,7 @@
 module Carto
   module Common
 
-    VERSION = '1.1.2'.freeze
+    VERSION = '1.1.3'.freeze
 
   end
 end
